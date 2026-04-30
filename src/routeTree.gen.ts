@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RecommendationRouteImport } from './routes/recommendation'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as ExplorerRouteImport } from './routes/explorer'
+import { Route as DetectionRouteImport } from './routes/detection'
+import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RecommendationRoute = RecommendationRouteImport.update({
+  id: '/recommendation',
+  path: '/recommendation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplorerRoute = ExplorerRouteImport.update({
+  id: '/explorer',
+  path: '/explorer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DetectionRoute = DetectionRouteImport.update({
+  id: '/detection',
+  path: '/detection',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/detection': typeof DetectionRoute
+  '/explorer': typeof ExplorerRoute
+  '/history': typeof HistoryRoute
+  '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
+  '/recommendation': typeof RecommendationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/detection': typeof DetectionRoute
+  '/explorer': typeof ExplorerRoute
+  '/history': typeof HistoryRoute
+  '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
+  '/recommendation': typeof RecommendationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/detection': typeof DetectionRoute
+  '/explorer': typeof ExplorerRoute
+  '/history': typeof HistoryRoute
+  '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
+  '/recommendation': typeof RecommendationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/assistant'
+    | '/detection'
+    | '/explorer'
+    | '/history'
+    | '/map'
+    | '/profile'
+    | '/recommendation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/assistant'
+    | '/detection'
+    | '/explorer'
+    | '/history'
+    | '/map'
+    | '/profile'
+    | '/recommendation'
+  id:
+    | '__root__'
+    | '/'
+    | '/assistant'
+    | '/detection'
+    | '/explorer'
+    | '/history'
+    | '/map'
+    | '/profile'
+    | '/recommendation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssistantRoute: typeof AssistantRoute
+  DetectionRoute: typeof DetectionRoute
+  ExplorerRoute: typeof ExplorerRoute
+  HistoryRoute: typeof HistoryRoute
+  MapRoute: typeof MapRoute
+  ProfileRoute: typeof ProfileRoute
+  RecommendationRoute: typeof RecommendationRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/recommendation': {
+      id: '/recommendation'
+      path: '/recommendation'
+      fullPath: '/recommendation'
+      preLoaderRoute: typeof RecommendationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explorer': {
+      id: '/explorer'
+      path: '/explorer'
+      fullPath: '/explorer'
+      preLoaderRoute: typeof ExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/detection': {
+      id: '/detection'
+      path: '/detection'
+      fullPath: '/detection'
+      preLoaderRoute: typeof DetectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssistantRoute: AssistantRoute,
+  DetectionRoute: DetectionRoute,
+  ExplorerRoute: ExplorerRoute,
+  HistoryRoute: HistoryRoute,
+  MapRoute: MapRoute,
+  ProfileRoute: ProfileRoute,
+  RecommendationRoute: RecommendationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
