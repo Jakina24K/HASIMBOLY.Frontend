@@ -20,7 +20,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   return (
-    <AppShell title="Profile & Notifications" subtitle="Tell us about your farm. We tailor everything around it.">
+    <AppShell title="Mombamomba sy Fampandrenesana" subtitle="Lazao anay ny momba ny taninao. Hifanaraka aminao ny zavatra rehetra.">
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="overflow-hidden border-border shadow-soft">
           <div className="relative h-32 bg-gradient-leaf">
@@ -34,23 +34,23 @@ function ProfilePage() {
             <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-border text-center">
               <div>
                 <div className="font-display text-xl">12</div>
-                <div className="text-xs text-muted-foreground">Plots</div>
+                <div className="text-xs text-muted-foreground">Tanim-boly</div>
               </div>
               <div>
                 <div className="font-display text-xl">234</div>
-                <div className="text-xs text-muted-foreground">Scans</div>
+                <div className="text-xs text-muted-foreground">Sary nojerena</div>
               </div>
               <div>
-                <div className="font-display text-xl">3y</div>
-                <div className="text-xs text-muted-foreground">With us</div>
+                <div className="font-display text-xl">3 t.</div>
+                <div className="text-xs text-muted-foreground">Niaraka taminay</div>
               </div>
             </div>
 
             <div className="mt-6 p-4 rounded-xl bg-accent/40 border border-border flex items-center gap-3">
               <Award className="h-5 w-5 text-terracotta" />
               <div>
-                <div className="font-medium text-sm">Sentinel grower</div>
-                <div className="text-xs text-muted-foreground">Top 5% data quality</div>
+                <div className="font-medium text-sm">Mpamboly modely</div>
+                <div className="text-xs text-muted-foreground">Anisan'ny 5% ambony amin'ny hatsaran'ny angona</div>
               </div>
             </div>
           </div>
@@ -58,10 +58,10 @@ function ProfilePage() {
 
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6 border-border shadow-soft">
-            <h3 className="font-display text-xl mb-5">Personal details</h3>
+            <h3 className="font-display text-xl mb-5">Antsipiriany manokana</h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Full name</Label>
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Anarana feno</Label>
                 <Input defaultValue="Rasoa Andrianavalona" className="mt-1.5" />
               </div>
               <div>
@@ -69,24 +69,24 @@ function ProfilePage() {
                 <Input defaultValue="rasoa@verdant.mg" className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Primary crop</Label>
-                <Input defaultValue="Rice" className="mt-1.5" />
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Voly fototra</Label>
+                <Input defaultValue="Vary" className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Farm size</Label>
-                <Input defaultValue="4.2 hectares" className="mt-1.5" />
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Habetsahan'ny tany</Label>
+                <Input defaultValue="4.2 hektara" className="mt-1.5" />
               </div>
             </div>
-            <Button className="mt-5 bg-leaf hover:bg-leaf/90 text-leaf-foreground">Save changes</Button>
+            <Button className="mt-5 bg-leaf hover:bg-leaf/90 text-leaf-foreground">Tehirizo ny fanovana</Button>
           </Card>
 
           <Card className="p-6 border-border shadow-soft">
-            <h3 className="font-display text-xl mb-5">Notifications</h3>
+            <h3 className="font-display text-xl mb-5">Fampandrenesana</h3>
             <div className="space-y-4">
               {[
-                { icon: Bell, title: "Disease alerts", desc: "Get notified when models detect risk in your region", on: true },
-                { icon: Mail, title: "Weekly digest", desc: "Summary of diagnoses and recommendations every Monday", on: true },
-                { icon: MapPin, title: "Climate warnings", desc: "Drought, frost or rainfall anomalies", on: false },
+                { icon: Bell, title: "Fampilazana aretina", desc: "Hampahafantarina rehefa misy risika hitan'ny modely ao amin'ny faritrao", on: true },
+                { icon: Mail, title: "Famintinana isan-kerinandro", desc: "Famintinana ny famantarana sy ny tolo-kevitra isaky ny Alatsinainy", on: true },
+                { icon: MapPin, title: "Fampitandremana toetrandro", desc: "Hain-tany, hatsiaka, na fiovan'ny orana", on: false },
               ].map((n) => (
                 <div key={n.title} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-secondary/30">
                   <div className="h-10 w-10 rounded-lg bg-leaf/10 flex items-center justify-center">

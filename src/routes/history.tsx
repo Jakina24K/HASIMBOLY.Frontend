@@ -25,13 +25,13 @@ const extended = [
 
 function HistoryPage() {
   return (
-    <AppShell title="History & Reports" subtitle="Every diagnosis you've made, ready to export.">
+    <AppShell title="Tantara sy Tatitra" subtitle="Ny famantarana rehetra nataonao, vonona haondrana.">
       <div className="grid lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total diagnoses", value: "234" },
-          { label: "Healthy rate", value: "67%" },
-          { label: "Avg. confidence", value: "91%" },
-          { label: "Regions covered", value: "8 / 22" },
+          { label: "Famantarana totaly", value: "234" },
+          { label: "Tahan'ny salama", value: "67%" },
+          { label: "Salan'ny fahatokisana", value: "91%" },
+          { label: "Faritra voarakitra", value: "8 / 22" },
         ].map((s) => (
           <Card key={s.label} className="p-5 border-border shadow-soft">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</div>
@@ -42,7 +42,7 @@ function HistoryPage() {
 
       <Card className="border-border shadow-soft overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h3 className="font-display text-2xl">Diagnosis log</h3>
+          <h3 className="font-display text-2xl">Rejisitran'ny famantarana</h3>
           <Button variant="outline" size="sm" className="gap-2"><Download className="h-3.5 w-3.5" /> Export CSV</Button>
         </div>
 
