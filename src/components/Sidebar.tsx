@@ -20,7 +20,7 @@ const nav = [
   { to: "/assistant", label: "Mpanampy AI", icon: MessageCircle },
   { to: "/map", label: "Sarintanin'i Madagasikara", icon: Map },
   { to: "/history", label: "Tantara sy Tatitra", icon: History },
-  { to: "/profile", label: "Mombamomba", icon: User },
+  { to: "/profile", label: "Mombamomba anao", icon: User },
 ] as const;
 
 export function Sidebar() {
@@ -35,8 +35,12 @@ export function Sidebar() {
           </div>
         </div>
         <div>
-          <div className="font-display text-lg font-semibold leading-none">Verdant<span className="text-leaf">.</span>AI</div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60 mt-1">Madagascar Edition</div>
+          <div className="font-display text-lg font-semibold leading-none">
+            HASIMBOLY<span className="text-leaf">.</span>AI
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60 mt-1">
+            TEAM CHILL
+          </div>
         </div>
       </div>
 
@@ -51,22 +55,21 @@ export function Sidebar() {
                 "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
                 active
                   ? "bg-sidebar-accent text-sidebar-primary-foreground shadow-soft"
-                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
               )}
             >
-              <Icon className={cn("h-4 w-4 transition-colors", active && "text-leaf")} strokeWidth={2} />
+              <Icon
+                className={cn("h-4 w-4 transition-colors", active && "text-leaf")}
+                strokeWidth={2}
+              />
               <span className={cn(active && "font-medium")}>{label}</span>
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-leaf animate-pulse-ring" />}
+              {active && (
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-leaf animate-pulse-ring" />
+              )}
             </Link>
           );
         })}
       </nav>
-
-      <div className="m-4 rounded-xl bg-sidebar-accent/60 p-4 border border-sidebar-border">
-        <div className="text-xs text-sidebar-foreground/70 leading-relaxed">
-          <span className="font-display italic text-leaf">Dikan-drafitra Beta.</span> Mbola an-tsary ny ML sy ontology endpoints — ampifandraiso amin'ny modely sy SPARQL backend rehefa vonona.
-        </div>
-      </div>
     </aside>
   );
 }

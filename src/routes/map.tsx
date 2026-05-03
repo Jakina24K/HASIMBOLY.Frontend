@@ -15,26 +15,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   madagascarRegions,
   productivityColor,
   productivityLabel,
   type RegionData,
 } from "@/lib/madagascar-regions";
+
 import { Search, MapPin, Layers, Sprout, CloudRain, Mountain, Lightbulb } from "lucide-react";
 
 const MadagascarLeafletMap = lazy(() =>
-  import("@/components/MadagascarLeafletMap").then((m) => ({ default: m.MadagascarLeafletMap })),
+  import("@/components/MadagascarLeafletMap").then((m) => ({
+    default: m.MadagascarLeafletMap,
+  })),
 );
 
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Madagascar Agricultural Map — VerdantAI" },
+      { title: "Sarintanin'ny Fambolena Madagasikara — HASIMBOLY.AI" },
       {
         name: "description",
         content:
-          "Explore Madagascar's regions and discover climate, soils, suitable crops and farming advice on an interactive agricultural map.",
+          "Tsidiho ireo faritra eto Madagasikara ary fantaro ny toetrandro, ny karazan-tany, ny voly mety hambolena ary ny torohevitra momba ny fambolena ao anatin’ny sarintany ifaneraserana.",
       },
     ],
   }),
@@ -45,11 +49,11 @@ export const Route = createFileRoute("/map")({
 type LayerKey = "productivity" | "rainfall" | "soil" | "climate" | "crops";
 
 const layerOptions: { value: LayerKey; label: string }[] = [
-  { value: "productivity", label: "Productivity" },
-  { value: "rainfall", label: "Rainfall zones" },
-  { value: "soil", label: "Soil types" },
-  { value: "climate", label: "Climate zones" },
-  { value: "crops", label: "Crop suitability" },
+  { value: "productivity", label: "Vokatra" },
+  { value: "rainfall", label: "Faritra be orana" },
+  { value: "soil", label: "Karazan-tany" },
+  { value: "climate", label: "Faritra toetrandro" },
+  { value: "crops", label: "Voly mety" },
 ];
 
 function MapPage() {
@@ -61,8 +65,9 @@ function MapPage() {
   const filteredRegions = useMemo(() => {
     return madagascarRegions.filter((r) => {
       const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
-      const matchesFilter =
-        productivityFilter === "all" || r.productivity === productivityFilter;
+
+      const matchesFilter = productivityFilter === "all" || r.productivity === productivityFilter;
+
       return matchesSearch && matchesFilter;
     });
   }, [search, productivityFilter]);
@@ -70,48 +75,55 @@ function MapPage() {
   return (
     <AppShell
       title="Sarintanin'i Madagasikara"
-      subtitle="Zahao ny faritra sy ny tombontsoa amin'ny fambolena"
+      subtitle="Jereo ny faritra sy ny tombontsoa amin'ny fambolena"
     >
-      {/* Toolbar */}
+      {/* Bara fanaraha-maso */}
       <Card className="p-4 mb-6 border-border">
         <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+          {/* Fikarohana */}
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
             <Input
-              placeholder="Hitady faritra…"
+              placeholder="Hitady faritra..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
 
+          {/* Sivana vokatra */}
           <Select value={productivityFilter} onValueChange={setProductivityFilter}>
-            <SelectTrigger className="w-full lg:w-[180px]">
-              <SelectValue placeholder="Vokatra" />
+            <SelectTrigger className="w-full lg:w-[190px]">
+              <SelectValue placeholder="Sivana vokatra" />
             </SelectTrigger>
+
             <SelectContent>
-              <SelectItem value="all">Vokatra rehetra</SelectItem>
-              <SelectItem value="high">Tombontsoa avo</SelectItem>
+              <SelectItem value="all">Rehetra</SelectItem>
+              <SelectItem value="high">Avo</SelectItem>
               <SelectItem value="medium">Antonony</SelectItem>
-              <SelectItem value="low">Iva</SelectItem>
-              <SelectItem value="difficult">Faritra sarotra</SelectItem>
+              <SelectItem value="low">Ambany</SelectItem>
+              <SelectItem value="difficult">Sarotra</SelectItem>
             </SelectContent>
           </Select>
 
+          {/* Sosona sarintany */}
           <Select value={layer} onValueChange={(v) => setLayer(v as LayerKey)}>
-            <SelectTrigger className="w-full lg:w-[200px]">
+            <SelectTrigger className="w-full lg:w-[220px]">
               <Layers className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
+
             <SelectContent>
-              {layerOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
+              {layerOptions.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
+          {/* Averina */}
           <Button
             variant="outline"
             onClick={() => {
@@ -121,43 +133,43 @@ function MapPage() {
               setSelected(madagascarRegions[0]);
             }}
           >
-            Reset
+            Averina
           </Button>
         </div>
 
-        {/* Quick filters / legend */}
+        {/* Fanazavana loko */}
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
           <span className="text-xs uppercase tracking-wider text-muted-foreground mr-1">
             Fanazavana
           </span>
+
           {(["high", "medium", "low", "difficult"] as const).map((p) => (
             <button
               key={p}
-              onClick={() =>
-                setProductivityFilter(productivityFilter === p ? "all" : p)
-              }
+              onClick={() => setProductivityFilter(productivityFilter === p ? "all" : p)}
               className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition ${
                 productivityFilter === p ? "border-foreground" : "border-border"
               }`}
             >
               <span
                 className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: productivityColor[p] }}
+                style={{
+                  backgroundColor: productivityColor[p],
+                }}
               />
+
               {productivityLabel[p]}
             </button>
           ))}
         </div>
       </Card>
 
-      {/* Main split */}
+      {/* Fizarana lehibe */}
       <div className="grid lg:grid-cols-10 gap-6">
-        {/* Map */}
+        {/* Sarintany */}
         <Card className="lg:col-span-7 p-0 overflow-hidden border-border shadow-soft relative">
           <div className="h-[520px] lg:h-[640px] relative">
-            <Suspense
-              fallback={<div className="h-full w-full bg-muted animate-pulse" />}
-            >
+            <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
               <MadagascarLeafletMap
                 selected={selected}
                 onSelect={setSelected}
@@ -166,12 +178,14 @@ function MapPage() {
               />
             </Suspense>
           </div>
-          {/* Region quick list overlay */}
+
+          {/* Lisitra faritra */}
           <div className="absolute top-3 left-3 z-[400] w-56 max-h-[60%] hidden md:block">
             <Card className="p-2 bg-card/95 backdrop-blur border-border">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1">
                 Faritra ({filteredRegions.length})
               </div>
+
               <ScrollArea className="h-[260px]">
                 <div className="space-y-0.5">
                   {filteredRegions.map((r) => (
@@ -184,14 +198,17 @@ function MapPage() {
                     >
                       <span
                         className="h-2 w-2 rounded-full shrink-0"
-                        style={{ backgroundColor: productivityColor[r.productivity] }}
+                        style={{
+                          backgroundColor: productivityColor[r.productivity],
+                        }}
                       />
                       {r.name}
                     </button>
                   ))}
+
                   {filteredRegions.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-3">
-                      Tsy misy faritra mifanaraka.
+                      Tsy misy faritra hita.
                     </p>
                   )}
                 </div>
@@ -200,15 +217,15 @@ function MapPage() {
           </div>
         </Card>
 
-        {/* Right panel */}
+        {/* Tontonana ankavanana */}
         <Card className="lg:col-span-3 p-6 border-border shadow-soft">
           <div className="flex items-center gap-2 text-terracotta mb-1">
             <MapPin className="h-4 w-4" />
-            <span className="text-xs uppercase tracking-wider font-medium">
-              Faritra voafidy
-            </span>
+            <span className="text-xs uppercase tracking-wider font-medium">Faritra voafidy</span>
           </div>
+
           <h3 className="font-display text-3xl mb-1">{selected.name}</h3>
+
           <div className="flex items-center gap-2 mb-4">
             <Badge
               style={{
@@ -218,29 +235,45 @@ function MapPage() {
             >
               {productivityLabel[selected.productivity]}
             </Badge>
-            <span className="text-xs text-muted-foreground">
-              Lonaka {selected.fertility}/100
-            </span>
+
+            <span className="text-xs text-muted-foreground">Halonaka {selected.fertility}/100</span>
           </div>
 
           <Tabs defaultValue="overview">
             <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="overview" className="text-xs">Topimaso</TabsTrigger>
-              <TabsTrigger value="crops" className="text-xs">Voly</TabsTrigger>
-              <TabsTrigger value="climate" className="text-xs">Toetrandro</TabsTrigger>
-              <TabsTrigger value="soil" className="text-xs">Tany</TabsTrigger>
-              <TabsTrigger value="advice" className="text-xs">Toro-hevitra</TabsTrigger>
+              <TabsTrigger value="overview" className="text-xs">
+                Topimaso
+              </TabsTrigger>
+
+              <TabsTrigger value="crops" className="text-xs">
+                Voly
+              </TabsTrigger>
+
+              <TabsTrigger value="climate" className="text-xs">
+                Toetrandro
+              </TabsTrigger>
+
+              <TabsTrigger value="soil" className="text-xs">
+                Tany
+              </TabsTrigger>
+
+              <TabsTrigger value="advice" className="text-xs">
+                Torohevitra
+              </TabsTrigger>
             </TabsList>
 
             <ScrollArea className="h-[460px] mt-4 pr-2">
+              {/* Topimaso */}
               <TabsContent value="overview" className="space-y-4 mt-0">
                 <p className="text-sm leading-relaxed">{selected.summary}</p>
 
                 <div>
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className="text-muted-foreground">Halonaky ny tany</span>
+
                     <span className="font-mono">{selected.fertility}%</span>
                   </div>
+
                   <Progress value={selected.fertility} />
                 </div>
 
@@ -250,83 +283,57 @@ function MapPage() {
                   <Stat label="Orana" value={selected.rainfall} />
                   <Stat label="Mari-pana" value={selected.temperature} />
                 </div>
-
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Loza mety hitranga
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selected.risks.map((r) => (
-                      <Badge key={r} variant="destructive" className="font-normal">
-                        {r}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
               </TabsContent>
 
+              {/* Voly */}
               <TabsContent value="crops" className="space-y-3 mt-0">
-                {selected.crops.map((c) => (
-                  <div key={c.name} className="space-y-1">
+                {selected.crops.map((crop) => (
+                  <div key={crop.name} className="space-y-1">
                     <div className="flex justify-between items-baseline">
                       <span className="text-sm font-medium flex items-center gap-2">
                         <Sprout className="h-3.5 w-3.5 text-leaf" />
-                        {c.name}
+                        {crop.name}
                       </span>
+
                       <span className="text-xs font-mono text-muted-foreground">
-                        {c.suitability}%
+                        {crop.suitability}%
                       </span>
                     </div>
-                    <Progress value={c.suitability} />
+
+                    <Progress value={crop.suitability} />
+
                     <div className="text-xs text-muted-foreground">
-                      Vanim-potoana mety: {c.season}
+                      Vanim-potoana: {crop.season}
                     </div>
                   </div>
                 ))}
-                <div className="pt-2">
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Zezika atolotra
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selected.fertilizers.map((f) => (
-                      <Badge key={f} variant="secondary" className="font-normal">
-                        {f}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
               </TabsContent>
 
+              {/* Toetrandro */}
               <TabsContent value="climate" className="space-y-3 mt-0">
-                <Stat label="Karazana toetrandro" value={selected.climate} icon={<CloudRain className="h-3.5 w-3.5" />} />
-                <Stat label="Oran'ny taona" value={selected.rainfall} />
-                <Stat label="Halehiben'ny mari-pana" value={selected.temperature} />
-                <p className="text-sm text-muted-foreground leading-relaxed pt-2">
-                  Ny vanim-potoana fambolena dia hita ao amin'ny soso-kevitra ho an'ny voly tsirairay.
-                </p>
+                <Stat
+                  label="Karazana toetrandro"
+                  value={selected.climate}
+                  icon={<CloudRain className="h-3.5 w-3.5" />}
+                />
+
+                <Stat label="Oran-taona" value={selected.rainfall} />
+
+                <Stat label="Mari-pana" value={selected.temperature} />
               </TabsContent>
 
+              {/* Tany */}
               <TabsContent value="soil" className="space-y-3 mt-0">
-                <Stat label="Karazan-tany" value={selected.soil} icon={<Mountain className="h-3.5 w-3.5" />} />
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Naoty halonaka</span>
-                    <span className="font-mono">{selected.fertility}/100</span>
-                  </div>
-                  <Progress value={selected.fertility} />
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Fanatsarana atolotra
-                  </div>
-                  <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-                    {selected.fertilizers.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                </div>
+                <Stat
+                  label="Karazan-tany"
+                  value={selected.soil}
+                  icon={<Mountain className="h-3.5 w-3.5" />}
+                />
+
+                <Progress value={selected.fertility} />
               </TabsContent>
 
+              {/* Torohevitra */}
               <TabsContent value="advice" className="space-y-2 mt-0">
                 {selected.advice.map((a) => (
                   <div
@@ -346,21 +353,14 @@ function MapPage() {
   );
 }
 
-function Stat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-}) {
+function Stat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div>
       <dt className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5 flex items-center gap-1">
         {icon}
         {label}
       </dt>
+
       <dd className="text-sm font-medium">{value}</dd>
     </div>
   );
