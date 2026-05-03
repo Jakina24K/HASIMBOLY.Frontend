@@ -69,8 +69,8 @@ function MapPage() {
 
   return (
     <AppShell
-      title="Madagascar Agricultural Map"
-      subtitle="Explore regions and farming opportunities"
+      title="Sarintanin'i Madagasikara"
+      subtitle="Zahao ny faritra sy ny tombontsoa amin'ny fambolena"
     >
       {/* Toolbar */}
       <Card className="p-4 mb-6 border-border">
@@ -78,7 +78,7 @@ function MapPage() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search a region…"
+              placeholder="Hitady faritra…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -87,14 +87,14 @@ function MapPage() {
 
           <Select value={productivityFilter} onValueChange={setProductivityFilter}>
             <SelectTrigger className="w-full lg:w-[180px]">
-              <SelectValue placeholder="Productivity" />
+              <SelectValue placeholder="Vokatra" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All productivity</SelectItem>
-              <SelectItem value="high">High potential</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="difficult">Difficult zone</SelectItem>
+              <SelectItem value="all">Vokatra rehetra</SelectItem>
+              <SelectItem value="high">Tombontsoa avo</SelectItem>
+              <SelectItem value="medium">Antonony</SelectItem>
+              <SelectItem value="low">Iva</SelectItem>
+              <SelectItem value="difficult">Faritra sarotra</SelectItem>
             </SelectContent>
           </Select>
 
@@ -128,7 +128,7 @@ function MapPage() {
         {/* Quick filters / legend */}
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
           <span className="text-xs uppercase tracking-wider text-muted-foreground mr-1">
-            Legend
+            Fanazavana
           </span>
           {(["high", "medium", "low", "difficult"] as const).map((p) => (
             <button
@@ -170,7 +170,7 @@ function MapPage() {
           <div className="absolute top-3 left-3 z-[400] w-56 max-h-[60%] hidden md:block">
             <Card className="p-2 bg-card/95 backdrop-blur border-border">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1">
-                Regions ({filteredRegions.length})
+                Faritra ({filteredRegions.length})
               </div>
               <ScrollArea className="h-[260px]">
                 <div className="space-y-0.5">
@@ -191,7 +191,7 @@ function MapPage() {
                   ))}
                   {filteredRegions.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-3">
-                      No regions match.
+                      Tsy misy faritra mifanaraka.
                     </p>
                   )}
                 </div>
@@ -205,7 +205,7 @@ function MapPage() {
           <div className="flex items-center gap-2 text-terracotta mb-1">
             <MapPin className="h-4 w-4" />
             <span className="text-xs uppercase tracking-wider font-medium">
-              Selected region
+              Faritra voafidy
             </span>
           </div>
           <h3 className="font-display text-3xl mb-1">{selected.name}</h3>
@@ -219,17 +219,17 @@ function MapPage() {
               {productivityLabel[selected.productivity]}
             </Badge>
             <span className="text-xs text-muted-foreground">
-              Fertility {selected.fertility}/100
+              Lonaka {selected.fertility}/100
             </span>
           </div>
 
           <Tabs defaultValue="overview">
             <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-              <TabsTrigger value="crops" className="text-xs">Crops</TabsTrigger>
-              <TabsTrigger value="climate" className="text-xs">Climate</TabsTrigger>
-              <TabsTrigger value="soil" className="text-xs">Soil</TabsTrigger>
-              <TabsTrigger value="advice" className="text-xs">Advice</TabsTrigger>
+              <TabsTrigger value="overview" className="text-xs">Topimaso</TabsTrigger>
+              <TabsTrigger value="crops" className="text-xs">Voly</TabsTrigger>
+              <TabsTrigger value="climate" className="text-xs">Toetrandro</TabsTrigger>
+              <TabsTrigger value="soil" className="text-xs">Tany</TabsTrigger>
+              <TabsTrigger value="advice" className="text-xs">Toro-hevitra</TabsTrigger>
             </TabsList>
 
             <ScrollArea className="h-[460px] mt-4 pr-2">
@@ -238,22 +238,22 @@ function MapPage() {
 
                 <div>
                   <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Soil fertility</span>
+                    <span className="text-muted-foreground">Halonaky ny tany</span>
                     <span className="font-mono">{selected.fertility}%</span>
                   </div>
                   <Progress value={selected.fertility} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <Stat label="Climate" value={selected.climate} />
-                  <Stat label="Soil" value={selected.soil} />
-                  <Stat label="Rainfall" value={selected.rainfall} />
-                  <Stat label="Temperature" value={selected.temperature} />
+                  <Stat label="Toetrandro" value={selected.climate} />
+                  <Stat label="Tany" value={selected.soil} />
+                  <Stat label="Orana" value={selected.rainfall} />
+                  <Stat label="Mari-pana" value={selected.temperature} />
                 </div>
 
                 <div>
                   <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Risks
+                    Loza mety hitranga
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {selected.risks.map((r) => (
@@ -279,13 +279,13 @@ function MapPage() {
                     </div>
                     <Progress value={c.suitability} />
                     <div className="text-xs text-muted-foreground">
-                      Best season: {c.season}
+                      Vanim-potoana mety: {c.season}
                     </div>
                   </div>
                 ))}
                 <div className="pt-2">
                   <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Recommended fertilizers
+                    Zezika atolotra
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {selected.fertilizers.map((f) => (
@@ -298,26 +298,26 @@ function MapPage() {
               </TabsContent>
 
               <TabsContent value="climate" className="space-y-3 mt-0">
-                <Stat label="Climate type" value={selected.climate} icon={<CloudRain className="h-3.5 w-3.5" />} />
-                <Stat label="Annual rainfall" value={selected.rainfall} />
-                <Stat label="Temperature range" value={selected.temperature} />
+                <Stat label="Karazana toetrandro" value={selected.climate} icon={<CloudRain className="h-3.5 w-3.5" />} />
+                <Stat label="Oran'ny taona" value={selected.rainfall} />
+                <Stat label="Halehiben'ny mari-pana" value={selected.temperature} />
                 <p className="text-sm text-muted-foreground leading-relaxed pt-2">
-                  Climate-driven planting windows are reflected in each crop's recommended season.
+                  Ny vanim-potoana fambolena dia hita ao amin'ny soso-kevitra ho an'ny voly tsirairay.
                 </p>
               </TabsContent>
 
               <TabsContent value="soil" className="space-y-3 mt-0">
-                <Stat label="Soil type" value={selected.soil} icon={<Mountain className="h-3.5 w-3.5" />} />
+                <Stat label="Karazan-tany" value={selected.soil} icon={<Mountain className="h-3.5 w-3.5" />} />
                 <div>
                   <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Fertility score</span>
+                    <span className="text-muted-foreground">Naoty halonaka</span>
                     <span className="font-mono">{selected.fertility}/100</span>
                   </div>
                   <Progress value={selected.fertility} />
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    Suggested amendments
+                    Fanatsarana atolotra
                   </div>
                   <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
                     {selected.fertilizers.map((f) => (

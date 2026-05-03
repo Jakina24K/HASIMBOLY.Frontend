@@ -19,14 +19,14 @@ export const Route = createFileRoute("/assistant")({
 type Msg = { role: "user" | "assistant"; content: string };
 
 const seed: Msg[] = [
-  { role: "assistant", content: "Manao ahoana! I'm your agronomic assistant. Ask me about diseases, soil amendments, planting windows, or anything growing on your land." },
+  { role: "assistant", content: "Manao ahoana! Izaho no mpanampy anao amin'ny fambolena. Anontanio momba ny aretina, ny fanatsarana ny tany, ny fotoana fambolena, na izay rehetra mitsiry eo amin'ny taninao." },
 ];
 
 const suggestions = [
-  "When should I plant rice in Alaotra?",
-  "How do I treat coffee leaf rust organically?",
-  "Best companion crops for cassava?",
-  "Lime application rate for lateritic soil",
+  "Rahoviana no tokony hambolena vary any Alaotra?",
+  "Ahoana no fitsaboana ny rotin'ny ravim-paraky amin'ny fomba voajanahary?",
+  "Inona no voly mahomby miaraka amin'ny mangahazo?",
+  "Habetsahan'ny sokay ho an'ny tany latérita",
 ];
 
 function AssistantPage() {
@@ -41,13 +41,13 @@ function AssistantPage() {
     setTimeout(() => {
       setMessages((m) => [...m, {
         role: "assistant",
-        content: "For optimal results in your context, I'd reason over the ontology and recent diagnoses. *(Wire this to Lovable AI Gateway in `/api/chat` to get real responses streamed token-by-token.)*",
+        content: "Mba hahazoana valiny tsara indrindra amin'ny toe-javatra misy anao, hisaintsaiko ny ontology sy ny famantarana farany. *(Ampifandraiso amin'ny Lovable AI Gateway ao amin'ny `/api/chat` mba hahazoana valiny tena izy mivantana.)*",
       }]);
     }, 700);
   };
 
   return (
-    <AppShell title="AI Assistant" subtitle="Conversational agronomy, grounded in the knowledge graph.">
+    <AppShell title="Mpanampy AI" subtitle="Resaka momba ny fambolena, miorina amin'ny knowledge graph.">
       <div className="grid lg:grid-cols-4 gap-6 h-[calc(100vh-13rem)]">
         <Card className="lg:col-span-3 flex flex-col border-border shadow-soft overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
@@ -65,7 +65,7 @@ function AssistantPage() {
 
           <div className="border-t border-border p-4">
             <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
-              <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask anything about your fields…" className="flex-1" />
+              <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Anontanio izay tianao momba ny taninao…" className="flex-1" />
               <Button type="submit" size="icon" className="bg-leaf hover:bg-leaf/90 text-leaf-foreground"><Send className="h-4 w-4" /></Button>
             </form>
           </div>
@@ -74,7 +74,7 @@ function AssistantPage() {
         <Card className="p-5 border-border shadow-soft h-fit">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-4 w-4 text-leaf" />
-            <h3 className="font-display text-lg">Suggestions</h3>
+            <h3 className="font-display text-lg">Soso-kevitra</h3>
           </div>
           <div className="space-y-2">
             {suggestions.map((s) => (

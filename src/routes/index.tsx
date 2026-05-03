@@ -37,20 +37,20 @@ function Stat({ icon: Icon, label, value, delta, tone }: { icon: any; label: str
 function Dashboard() {
   const max = Math.max(...usageStats.map((s) => s.diagnoses));
   return (
-    <AppShell title="Good morning, Rasoa" subtitle="Here's what your fields are telling us today.">
+    <AppShell title="Manao ahoana, Rasoa" subtitle="Inty ny zavatra lazain'ny tanimbolinao androany.">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-hero text-primary-foreground mb-8 shadow-elegant">
         <img src={heroLeaf} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" width={1600} height={1024} />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-transparent" />
         <div className="relative px-8 lg:px-12 py-12 lg:py-16 max-w-2xl">
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-leaf font-medium">
-            <span className="h-1 w-8 bg-leaf" /> Today's outlook
+            <span className="h-1 w-8 bg-leaf" /> Vinavinan'ny androany
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mt-4 leading-tight text-balance">
-            Two fields need attention. <span className="italic text-leaf">Three are thriving.</span>
+            Tanimboly roa mila fitandremana. <span className="italic text-leaf">Telo no mandroso tsara.</span>
           </h2>
           <p className="mt-4 text-primary-foreground/70 max-w-lg">
-            Combined ML diagnostics and semantic reasoning surface what matters across all your plots.
+            Ny fitambaran'ny ML diagnostics sy ny semantic reasoning no manasongadina izay zava-dehibe eo amin'ny tanimbolinao rehetra.
           </p>
           <div className="flex gap-3 mt-8">
             <Button asChild size="lg" className="bg-leaf hover:bg-leaf/90 text-leaf-foreground">
@@ -65,10 +65,10 @@ function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Stat icon={Microscope} label="Diagnoses this week" value="128" delta="12%" tone="leaf" />
-        <Stat icon={Sprout} label="Active recommendations" value="34" delta="8%" tone="moss" />
-        <Stat icon={AlertTriangle} label="Active alerts" value="3" delta="1" tone="terracotta" />
-        <Stat icon={Activity} label="Avg. confidence" value="91%" delta="2.4%" tone="leaf" />
+        <Stat icon={Microscope} label="Famantarana tamin'ity herinandro ity" value="128" delta="12%" tone="leaf" />
+        <Stat icon={Sprout} label="Tolo-kevitra mavitrika" value="34" delta="8%" tone="moss" />
+        <Stat icon={AlertTriangle} label="Fampilazana mavitrika" value="3" delta="1" tone="terracotta" />
+        <Stat icon={Activity} label="Salan'isan'ny fahatokisana" value="91%" delta="2.4%" tone="leaf" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -76,11 +76,11 @@ function Dashboard() {
         <Card className="lg:col-span-2 p-6 border-border shadow-soft">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-display text-xl">Recent diagnoses</h3>
-              <p className="text-sm text-muted-foreground">Latest five field analyses</p>
+              <h3 className="font-display text-xl">Famantarana farany</h3>
+              <p className="text-sm text-muted-foreground">Famakafakana dimy farany teny an-tsaha</p>
             </div>
             <Link to="/history" className="text-sm text-leaf hover:underline inline-flex items-center gap-1">
-              View all <ArrowUpRight className="h-3.5 w-3.5" />
+              Hijery ny rehetra <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
           <div className="divide-y divide-border">
@@ -106,8 +106,8 @@ function Dashboard() {
 
         {/* Alerts */}
         <Card className="p-6 border-border shadow-soft">
-          <h3 className="font-display text-xl mb-1">Field alerts</h3>
-          <p className="text-sm text-muted-foreground mb-5">Reasoned from climate + ontology</p>
+          <h3 className="font-display text-xl mb-1">Fampilazana an-tsaha</h3>
+          <p className="text-sm text-muted-foreground mb-5">Avy amin'ny toetrandro sy ny ontology</p>
           <div className="space-y-3">
             {alerts.map((a) => (
               <div key={a.id} className="p-4 rounded-xl border border-border bg-secondary/40">
@@ -127,8 +127,8 @@ function Dashboard() {
         <Card className="p-6 border-border shadow-soft lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-display text-xl">Weekly activity</h3>
-              <p className="text-sm text-muted-foreground">Diagnoses vs recommendations</p>
+              <h3 className="font-display text-xl">Hetsika isan-kerinandro</h3>
+              <p className="text-sm text-muted-foreground">Famantarana sy tolo-kevitra</p>
             </div>
             <TrendingUp className="h-4 w-4 text-leaf" />
           </div>
@@ -144,15 +144,15 @@ function Dashboard() {
             ))}
           </div>
           <div className="flex gap-4 mt-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-leaf" /> Diagnoses</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-terracotta" /> Recommendations</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-leaf" /> Famantarana</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-terracotta" /> Tolo-kevitra</span>
           </div>
         </Card>
 
         {/* Top crops */}
         <Card className="p-6 border-border shadow-soft">
-          <h3 className="font-display text-xl mb-1">Top recommended</h3>
-          <p className="text-sm text-muted-foreground mb-5">For your context</p>
+          <h3 className="font-display text-xl mb-1">Voly tsara indrindra</h3>
+          <p className="text-sm text-muted-foreground mb-5">Ho an'ny toe-javatra misy anao</p>
           <div className="space-y-4">
             {cropRecommendations.slice(0, 3).map((c) => (
               <div key={c.name}>
