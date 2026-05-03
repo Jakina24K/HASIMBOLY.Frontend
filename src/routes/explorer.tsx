@@ -23,12 +23,12 @@ function ExplorerPage() {
   );
 
   return (
-    <AppShell title="Knowledge Explorer" subtitle="The agricultural ontology, browsable as triples. Each link encodes domain expertise.">
+    <AppShell title="Fitrandrahana Fahalalana" subtitle="Ny ontology momba ny fambolena, azo zahana amin'ny endrika triples. Ny rohy tsirairay dia mitana ny fahalalana manokana.">
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
         {[
-          { label: "Crops", value: 42, hint: "Cassava, Rice, Vanilla…" },
-          { label: "Relationships", value: 187, hint: "thrivesIn, requires, tolerates…" },
-          { label: "Inferred rules", value: 64, hint: "Derived via reasoner" },
+          { label: "Voly", value: 42, hint: "Mangahazo, Vary, Lavanila…" },
+          { label: "Fifandraisana", value: 187, hint: "thrivesIn, requires, tolerates…" },
+          { label: "Fitsipika nosintonina", value: 64, hint: "Avy amin'ny reasoner" },
         ].map((s) => (
           <Card key={s.label} className="p-6 border-border shadow-soft">
             <div className="flex items-center gap-3">
@@ -48,12 +48,12 @@ function ExplorerPage() {
       <Card className="p-6 border-border shadow-soft">
         <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h3 className="font-display text-2xl">Triple browser</h3>
+            <h3 className="font-display text-2xl">Mpitety triple</h3>
             <p className="text-sm text-muted-foreground">subject — predicate — object</p>
           </div>
           <div className="relative w-full sm:w-80">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the graph…" className="pl-9" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hitady ao amin'ny graph…" className="pl-9" />
           </div>
         </div>
 
@@ -66,12 +66,12 @@ function ExplorerPage() {
                 <span className="px-3 py-1.5 rounded-md bg-secondary text-muted-foreground font-mono text-xs italic">{c.predicate}</span>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 <span className="px-3 py-1.5 rounded-md bg-terracotta/10 text-terracotta font-mono text-sm">{c.object}</span>
-                <span className="ml-auto text-xs font-mono text-muted-foreground">strength {c.strength.toFixed(2)}</span>
+                <span className="ml-auto text-xs font-mono text-muted-foreground">hery {c.strength.toFixed(2)}</span>
               </div>
             </div>
           ))}
           {filtered.length === 0 && (
-            <p className="text-center text-muted-foreground py-12">No triples match.</p>
+            <p className="text-center text-muted-foreground py-12">Tsy misy triple mifanaraka.</p>
           )}
         </div>
       </Card>
