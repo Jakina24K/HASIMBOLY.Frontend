@@ -11,7 +11,7 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground w-72">
             <Search className="h-4 w-4" />
-            <span>Search crops, diseases, regions…</span>
+            <span>Hitady voly, aretina, faritra…</span>
             <kbd className="ml-auto text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">⌘K</kbd>
           </div>
           <button className="relative h-10 w-10 rounded-full border border-border bg-card flex items-center justify-center hover:shadow-soft transition">

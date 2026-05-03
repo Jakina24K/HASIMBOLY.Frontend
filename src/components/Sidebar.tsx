@@ -13,14 +13,14 @@ import {
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/detection", label: "Disease Detection", icon: Microscope },
-  { to: "/recommendation", label: "Smart Recommendation", icon: Sparkles },
-  { to: "/explorer", label: "Knowledge Explorer", icon: Network },
-  { to: "/assistant", label: "AI Assistant", icon: MessageCircle },
-  { to: "/map", label: "Madagascar Map", icon: Map },
-  { to: "/history", label: "History & Reports", icon: History },
-  { to: "/profile", label: "Profile", icon: User },
+  { to: "/", label: "Tabilao", icon: LayoutDashboard },
+  { to: "/detection", label: "Famantarana Aretina", icon: Microscope },
+  { to: "/recommendation", label: "Tolo-kevitra Mahay", icon: Sparkles },
+  { to: "/explorer", label: "Fitrandrahana Fahalalana", icon: Network },
+  { to: "/assistant", label: "Mpanampy AI", icon: MessageCircle },
+  { to: "/map", label: "Sarintanin'i Madagasikara", icon: Map },
+  { to: "/history", label: "Tantara sy Tatitra", icon: History },
+  { to: "/profile", label: "Mombamomba", icon: User },
 ] as const;
 
 export function Sidebar() {
@@ -64,7 +64,7 @@ export function Sidebar() {
 
       <div className="m-4 rounded-xl bg-sidebar-accent/60 p-4 border border-sidebar-border">
         <div className="text-xs text-sidebar-foreground/70 leading-relaxed">
-          <span className="font-display italic text-leaf">Beta build.</span> ML & ontology endpoints are stubbed — wire your model & SPARQL backend when ready.
+          <span className="font-display italic text-leaf">Dikan-drafitra Beta.</span> Mbola an-tsary ny ML sy ontology endpoints — ampifandraiso amin'ny modely sy SPARQL backend rehefa vonona.
         </div>
       </div>
     </aside>
