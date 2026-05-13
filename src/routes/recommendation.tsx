@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
@@ -11,25 +12,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { regions, cropRecommendations } from "@/lib/mock-data";
+import { regions } from "@/lib/mock-data";
 import { Sparkles, Sprout, TrendingUp, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/recommendation")({
-  head: () => ({
-    meta: [
-      { title: "Smart Recommendation — VerdantAI" },
-      {
-        name: "description",
-        content:
-          "Get crop recommendations based on region, season, soil and climate using semantic reasoning.",
-      },
-    ],
-  }),
   component: RecommendationPage,
 });
 
 function RecommendationPage() {
   const [generated, setGenerated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+
+  const [form, setForm] = useState({
+    region: "analamanga",
+    season: "Mafana_sy_Maina",
+    soil: "volcanic",
+    climate: "temperate",
+  });
+
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setGenerated(false);
+
+      console.log("FORM SENT:", form);
+
+      const res = await axios.post("http://127.0.0.1:8000/api/culture_from_caracteristics/", {
+        caracteristic: form,
+      });
+
+      console.log("API RESPONSE:", res.data);
+
+      const data = res.data?.cultures || [];
+
+      setRecommendations(data);
+      setGenerated(true);
+    } catch (err) {
+      console.log("API ERROR:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AppShell
@@ -37,6 +61,7 @@ function RecommendationPage() {
       subtitle="Akambano amin'ny ontology momba ny fambolena ny toe-javatra misy anao mba hahitana ny voly mety indrindra."
     >
       <div className="grid lg:grid-cols-5 gap-6">
+        {/* LEFT PANEL (IDENTICAL DESIGN) */}
         <Card className="lg:col-span-2 p-6 border-border shadow-soft h-fit sticky top-24">
           <h3 className="font-display text-xl mb-1">Toe-javatra misy anao</h3>
           <p className="text-sm text-muted-foreground mb-6">
@@ -44,11 +69,15 @@ function RecommendationPage() {
           </p>
 
           <div className="space-y-4">
+            {/* REGION */}
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Faritra
               </Label>
-              <Select defaultValue="antananarivo">
+              <Select
+                value={form.region}
+                onValueChange={(v) => setForm((p) => ({ ...p, region: v }))}
+              >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -61,11 +90,16 @@ function RecommendationPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* SEASON */}
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Vanim-potoana
               </Label>
-              <Select defaultValue="rainy">
+              <Select
+                value={form.season}
+                onValueChange={(v) => setForm((p) => ({ ...p, season: v }))}
+              >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -76,11 +110,13 @@ function RecommendationPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* SOIL */}
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Karazana tany
               </Label>
-              <Select defaultValue="volcanic">
+              <Select value={form.soil} onValueChange={(v) => setForm((p) => ({ ...p, soil: v }))}>
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -92,11 +128,16 @@ function RecommendationPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* CLIMATE */}
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Toetrandro
               </Label>
-              <Select defaultValue="temperate">
+              <Select
+                value={form.climate}
+                onValueChange={(v) => setForm((p) => ({ ...p, climate: v }))}
+              >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -108,16 +149,20 @@ function RecommendationPage() {
               </Select>
             </div>
 
+            {/* BUTTON (UNCHANGED STYLE) */}
             <Button
               className="w-full bg-leaf hover:bg-leaf/90 text-leaf-foreground gap-2 mt-2"
               size="lg"
-              onClick={() => setGenerated(true)}
+              onClick={handleGenerate}
+              disabled={loading}
             >
-              <Sparkles className="h-4 w-4" /> Mamorona tolo-kevitra
+              <Sparkles className="h-4 w-4" />
+              {loading ? "Miasa..." : "Mamorona tolo-kevitra"}
             </Button>
           </div>
         </Card>
 
+        {/* RIGHT PANEL (UNCHANGED UI) */}
         <div className="lg:col-span-3 space-y-4">
           {!generated ? (
             <Card className="p-12 border-dashed flex flex-col items-center justify-center min-h-[500px] text-center">
@@ -130,9 +175,9 @@ function RecommendationPage() {
               </p>
             </Card>
           ) : (
-            cropRecommendations.map((c, i) => (
+            recommendations.map((c, i) => (
               <Card
-                key={c.name}
+                key={c.name || i}
                 className="p-6 border-border shadow-soft hover:shadow-elegant transition group"
               >
                 <div className="flex items-start gap-5">
@@ -145,20 +190,22 @@ function RecommendationPage() {
                       </span>
                     </div>
                   </div>
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-3 flex-wrap">
                       <h3 className="font-display text-2xl">{c.name}</h3>
-                      <span className="text-xs font-mono text-muted-foreground">
-                        #{i + 1} amin'ny {cropRecommendations.length}
-                      </span>
+                      <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{c.note}</p>
+
+                    <p className="text-sm text-muted-foreground mt-1.5">{c.note}</p>
+
                     <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
                       <div className="flex items-center gap-2 text-sm">
                         <TrendingUp className="h-4 w-4 text-leaf" />
                         <span className="text-muted-foreground">Vokatra</span>
                         <span className="font-mono">{c.yield}</span>
                       </div>
+
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="h-4 w-4 text-terracotta" />
                         <span className="text-muted-foreground">Vanim-potoana</span>

@@ -11,7 +11,7 @@ import { treatments } from "@/lib/mock-data";
 export const Route = createFileRoute("/detection")({
   head: () => ({
     meta: [
-      { title: "Famantarana Aretina — VerdantAI" },
+      { title: "Famantarana Aretina — HASIMBOLY.IA" },
       {
         name: "description",
         content:

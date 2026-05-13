@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/explorer")({
   head: () => ({
     meta: [
-      { title: "Fitrandrahana Fahalalana — VerdantAI" },
+      { title: "Fitrandrahana Fahalalana — HASIMBOLY.IA" },
       {
         name: "description",
         content:

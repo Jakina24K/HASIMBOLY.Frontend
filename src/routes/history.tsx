@@ -9,7 +9,7 @@ import { Download, FileText } from "lucide-react";
 export const Route = createFileRoute("/history")({
   head: () => ({
     meta: [
-      { title: "Tantara sy Tatitra — VerdantAI" },
+      { title: "Tantara sy Tatitra — HASIMBOLY.IA" },
       {
         name: "description",
         content:

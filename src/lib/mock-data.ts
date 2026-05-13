@@ -50,7 +50,7 @@ export const recentDiagnoses = [
     disease: "Late Blight",
     date: "2026-04-28",
     confidence: 94,
-    region: "Antananarivo",
+    region: "Analamanga",
   },
   {
     id: "r2",
@@ -88,8 +88,8 @@ export const recentDiagnoses = [
 
 export const regions = [
   {
-    id: "antananarivo",
-    name: "Antananarivo",
+    id: "analamanga",
+    name: "Analamanga",
     climate: "Highland temperate",
     soil: "Volcanic loam",
     crops: ["Rice", "Potato", "Maize"],

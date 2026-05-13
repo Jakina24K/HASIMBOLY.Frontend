@@ -9,7 +9,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/assistant")({
   head: () => ({
     meta: [
-      { title: "Mpampianatra AI — VerdantAI" },
+      { title: "Mpampianatra AI — HASIMBOLY.IA" },
       {
         name: "description",
         content: "Mametraha fanontaniana momba ny voly, aretin-javamaniry, na fomba fambolena.",
