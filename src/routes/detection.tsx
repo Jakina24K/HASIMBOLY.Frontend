@@ -3,8 +3,16 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Camera, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react";
-import { useState } from "react";
+import {
+  Upload,
+  Camera,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+} from "lucide-react";
+
+import { useState, useEffect, useRef } from "react";
+
 import diseasedLeaf from "@/assets/diseased-leaf.jpg";
 import { treatments } from "@/lib/mock-data";
 
@@ -26,16 +34,267 @@ function DetectionPage() {
   const [analyzed, setAnalyzed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const analyze = () => {
-    setLoading(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    setTimeout(() => {
-      setLoading(false);
+  const [stage, setStage] = useState<
+    "idle" | "uploading" | "predicting" | "generating"
+  >("idle");
+
+  const [solution, setSolution] = useState<any>(null);
+
+  const [prediction, setPrediction] = useState<
+    | {
+        class_index: number;
+        class_name: string;
+        probability: number;
+      }
+    | null
+  >(null);
+
+  const [error, setError] = useState<string | null>(null);
+
+  const controllerRef = useRef<AbortController | null>(null);
+
+  const apiBase =
+    import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      controllerRef.current?.abort();
+    };
+  }, [previewUrl]);
+
+  async function requestDiseaseSolution(
+    cleanedTheme: string,
+    text: string,
+    mode: string,
+    signal: AbortSignal
+  ) {
+    console.log("CALLING SOLUTION API");
+
+    const res = await fetch(
+      `${apiBase}/api/disease/solution/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cleaned_theme: cleanedTheme,
+          text,
+          mode,
+        }),
+        signal,
+      }
+    );
+
+    console.log("SOLUTION STATUS:", res.status);
+
+    if (!res.ok) {
+      const errText = await res.text();
+
+      console.error(errText);
+
+      throw new Error(
+        `Failed solution request (${res.status})`
+      );
+    }
+
+    return await res.json();
+  }
+
+  const analyze = async () => {
+    setError(null);
+
+    if (!file) {
+      setError("Mifidiana sary aloha (JPG/PNG).");
+      return;
+    }
+
+    const isValidType = file.type.startsWith("image/");
+    const isValidSize = file.size <= 10 * 1024 * 1024;
+
+    if (!isValidType || !isValidSize) {
+      setError("Tsy mety ny rakitra. Alefaso JPG/PNG latsaky ny 10MB.");
+      return;
+    }
+
+    controllerRef.current?.abort();
+
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    setLoading(true);
+    setAnalyzed(false);
+    setPrediction(null);
+    setSolution(null);
+
+    try {
+      setStage("uploading");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const predictRes = await fetch(
+        `${apiBase}/api/disease/predict/`,
+        {
+          method: "POST",
+          body: formData,
+          signal: controller.signal,
+        }
+      );
+
+      if (!predictRes.ok) {
+        throw new Error(
+          `Prediction failed (${predictRes.status})`
+        );
+      }
+
+      setStage("predicting");
+
+      const predictData = await predictRes.json();
+
+      console.log("PREDICT RESPONSE:", predictData);
+
+      if (!predictData?.class_name) {
+        throw new Error("No class_name returned");
+      }
+
+      setPrediction({
+        class_index: predictData.class_index ?? 0,
+        class_name: predictData.class_name,
+        probability: predictData.probability ?? 0,
+      });
+
+      setStage("generating");
+
+      const solutionData = await requestDiseaseSolution(
+        "Ravinkazo",
+        `Aretina: ${predictData.class_name}`,
+        "Agronome",
+        controller.signal
+      );
+
+      console.log("SOLUTION RESPONSE:", solutionData);
+
+      setSolution(solutionData);
+
       setAnalyzed(true);
-    }, 1400);
+    } catch (e) {
+      console.error(e);
+
+      if (e instanceof DOMException && e.name === "AbortError") {
+        console.log("Request aborted");
+        return;
+      }
+
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Error during prediction"
+      );
+    } finally {
+      setLoading(false);
+      setStage("idle");
+    }
   };
 
-  const result = treatments["Tomato Late Blight"];
+  const resetAll = () => {
+    controllerRef.current?.abort();
+
+    setAnalyzed(false);
+    setLoading(false);
+    setFile(null);
+    setPrediction(null);
+    setSolution(null);
+    setError(null);
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setPreviewUrl(null);
+  };
+
+  const derivedClassName =
+    prediction?.class_name ?? "Tomato Late Blight";
+
+  const baseTreatment =
+    treatments[derivedClassName] ??
+    treatments["Tomato Late Blight"];
+
+  const apiResult = solution?.result;
+
+  const parsedResult = (() => {
+    // CASE 1: structured JSON
+    if (
+      apiResult &&
+      typeof apiResult === "object" &&
+      Array.isArray(apiResult?.treatment) &&
+      Array.isArray(apiResult?.prevention)
+    ) {
+      return {
+        treatment: apiResult.treatment,
+        prevention: apiResult.prevention,
+      };
+    }
+
+    // CASE 2: plain text response
+    if (typeof apiResult === "string") {
+      const text = apiResult;
+
+      const treatmentMatch =
+        text.match(
+          /Actions Immédiates\s*:\s*([\s\S]*?)(Prévention\s*:|Amélioration de la Précision\s*:|$)/i
+        );
+
+      const preventionMatch =
+        text.match(
+          /Prévention\s*:\s*([\s\S]*)/i
+        );
+
+      const treatmentText =
+        treatmentMatch?.[1]
+          ?.trim()
+          ?.split(".")
+          ?.map((s: string) => s.trim())
+          ?.filter(Boolean) || [];
+
+      const preventionText =
+        preventionMatch?.[1]
+          ?.trim()
+          ?.split(".")
+          ?.map((s: string) => s.trim())
+          ?.filter(Boolean) || [];
+
+      return {
+        treatment:
+          treatmentText.length > 0
+            ? treatmentText
+            : baseTreatment.treatment,
+
+        prevention:
+          preventionText.length > 0
+            ? preventionText
+            : baseTreatment.prevention,
+      };
+    }
+
+    // fallback
+    return baseTreatment;
+  })();
+
+  const result = parsedResult;
+
+  const confidence =
+    (prediction?.probability ?? 0) <= 1
+      ? Math.round((prediction?.probability ?? 0) * 100)
+      : Math.round(prediction?.probability ?? 0);
 
   return (
     <AppShell
@@ -45,45 +304,119 @@ function DetectionPage() {
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Upload */}
         <Card className="lg:col-span-2 p-6 border-border shadow-soft">
-          <h3 className="font-display text-xl mb-4">1. Hampiditra santionany</h3>
+          <h3 className="font-display text-xl mb-4">
+            1. Hampiditra santionany
+          </h3>
 
-          <div className="aspect-square rounded-2xl border-2 border-dashed border-border bg-secondary/40 flex flex-col items-center justify-center relative overflow-hidden group">
-            {analyzed || loading ? (
+          <div
+            className={`aspect-square rounded-2xl border-2 border-dashed border-border bg-secondary/40 flex flex-col items-center justify-center relative overflow-hidden group transition-all ${
+              loading ? "cursor-wait" : ""
+            }`}
+          >
+            <input
+              id="detection-file"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const next = e.target.files?.[0] ?? null;
+
+                setFile(next);
+
+                if (previewUrl) {
+                  URL.revokeObjectURL(previewUrl);
+                }
+
+                setPreviewUrl(
+                  next ? URL.createObjectURL(next) : null
+                );
+
+                setAnalyzed(false);
+                setPrediction(null);
+                setSolution(null);
+                setError(null);
+              }}
+            />
+
+            {previewUrl ? (
               <>
                 <img
-                  src={diseasedLeaf}
-                  alt="Ravina marary"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  src={previewUrl}
+                  alt="Preview"
+                  className="absolute inset-0 w-full h-full object-cover transition-all duration-300"
                   loading="lazy"
                   width={800}
                   height={800}
                 />
 
                 {loading && (
-                  <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm flex flex-col items-center justify-center">
-                    <div className="h-14 w-14 rounded-full border-2 border-leaf border-t-transparent animate-spin" />
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center z-10">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full border-4 border-white/20" />
 
-                    <p className="text-primary-foreground mt-4 font-display italic">
-                      Mamaky ny ravina...
+                      <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-white border-t-transparent animate-spin" />
+                    </div>
+
+                    <p className="text-white mt-5 font-display text-lg">
+                      {stage === "uploading" &&
+                        "Mandefa sary..."}
+
+                      {stage === "predicting" &&
+                        "Mamantatra aretina..."}
+
+                      {stage === "generating" &&
+                        "Mamokatra vahaolana..."}
+                    </p>
+
+                    <p className="text-white/70 text-sm mt-2">
+                      Miandrasa kely azafady...
                     </p>
                   </div>
                 )}
               </>
             ) : (
-              <>
+              <label
+                htmlFor="detection-file"
+                className="cursor-pointer w-full h-full flex flex-col items-center justify-center p-4"
+              >
                 <div className="h-16 w-16 rounded-2xl bg-leaf/10 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                   <Upload className="h-7 w-7 text-leaf" />
                 </div>
 
-                <p className="font-medium">Ampidiro ny sary eto</p>
+                <p className="font-medium">
+                  Ampidiro ny sary eto
+                </p>
 
-                <p className="text-sm text-muted-foreground mt-1">JPG, PNG hatramin'ny 10 MB</p>
-              </>
+                <p className="text-sm text-muted-foreground mt-1">
+                  JPG, PNG hatramin'ny 10 MB
+                </p>
+              </label>
             )}
           </div>
 
+          {file && (
+            <p className="text-sm text-muted-foreground mt-3 truncate">
+              {file.name}
+            </p>
+          )}
+
+          {error && (
+            <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() =>
+                document
+                  .getElementById("detection-file")
+                  ?.click()
+              }
+              disabled={loading}
+            >
               <Camera className="h-4 w-4" />
               Fakan-tsary
             </Button>
@@ -91,10 +424,8 @@ function DetectionPage() {
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => {
-                setAnalyzed(false);
-                setLoading(false);
-              }}
+              onClick={resetAll}
+              disabled={loading}
             >
               Avereno
             </Button>
@@ -104,10 +435,13 @@ function DetectionPage() {
             className="w-full mt-3 bg-leaf hover:bg-leaf/90 text-leaf-foreground gap-2"
             size="lg"
             onClick={analyze}
-            disabled={loading}
+            disabled={loading || !file}
           >
             <Sparkles className="h-4 w-4" />
-            {loading ? "Manadihady..." : "Handinika amin'ny AI"}
+
+            {loading
+              ? "Manadihady..."
+              : "Handinika amin'ny AI"}
           </Button>
         </Card>
 
@@ -119,11 +453,22 @@ function DetectionPage() {
                 <Sparkles className="h-8 w-8 text-leaf" />
               </div>
 
-              <h3 className="font-display text-2xl">Miandry ny santionanao</h3>
+              <h3 className="font-display text-2xl">
+                Miandry ny santionanao
+              </h3>
 
               <p className="text-muted-foreground mt-2 max-w-sm">
-                Hiseho eto ny valiny miaraka amin'ny fitsaboana sy fisorohana.
+                Hiseho eto ny valiny miaraka amin'ny
+                fitsaboana sy fisorohana.
               </p>
+
+              {previewUrl && !loading && (
+                <img
+                  src={previewUrl}
+                  alt="Selected leaf"
+                  className="mt-6 w-44 h-44 object-cover rounded-2xl border border-border shadow-soft"
+                />
+              )}
             </Card>
           ) : (
             <>
@@ -135,10 +480,12 @@ function DetectionPage() {
                       Hamafiny avo
                     </Badge>
 
-                    <h2 className="font-display text-3xl">Tomato Late Blight</h2>
+                    <h2 className="font-display text-3xl">
+                      {prediction?.class_name}
+                    </h2>
 
                     <p className="text-muted-foreground mt-1 italic font-display">
-                      Phytophthora infestans
+                      AI disease detection
                     </p>
                   </div>
 
@@ -148,44 +495,39 @@ function DetectionPage() {
                     </div>
 
                     <div className="font-display text-4xl text-leaf">
-                      94
-                      <span className="text-lg text-muted-foreground">%</span>
+                      {confidence}
+                      <span className="text-lg text-muted-foreground">
+                        %
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-3 pt-6 border-t border-border">
-                  {[
-                    {
-                      label: "Late Blight",
-                      v: 94,
-                    },
-                    {
-                      label: "Early Blight",
-                      v: 4,
-                    },
-                    {
-                      label: "Salama",
-                      v: 2,
-                    },
-                  ].map((r) => (
-                    <div key={r.label}>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-muted-foreground">{r.label}</span>
+                <div className="mt-6 grid grid-cols-1 gap-4 pt-6 border-t border-border md:grid-cols-[120px_1fr]">
+                  <img
+                    src={previewUrl ?? diseasedLeaf}
+                    alt="Analyzed leaf"
+                    className="w-full h-32 md:h-28 object-cover rounded-xl border border-border"
+                  />
 
-                        <span className="font-mono">{r.v}%</span>
-                      </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="text-sm text-muted-foreground">
+                      Ny AI dia nahita aretina mety ho:
+                    </p>
 
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-leaf"
-                          style={{
-                            width: `${r.v}%`,
-                          }}
-                        />
-                      </div>
+                    <p className="font-display text-xl mt-1">
+                      {prediction?.class_name}
+                    </p>
+
+                    <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-leaf transition-all duration-700"
+                        style={{
+                          width: `${confidence}%`,
+                        }}
+                      />
                     </div>
-                  ))}
+                  </div>
                 </div>
               </Card>
 
@@ -198,19 +540,26 @@ function DetectionPage() {
                       <AlertTriangle className="h-4 w-4 text-terracotta" />
                     </div>
 
-                    <h3 className="font-display text-lg">Fitsaboana</h3>
+                    <h3 className="font-display text-lg">
+                      Fitsaboana
+                    </h3>
                   </div>
 
                   <ul className="space-y-3">
-                    {result.treatment.map((t, i) => (
-                      <li key={i} className="flex gap-3 text-sm">
-                        <span className="font-mono text-terracotta text-xs mt-1">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
+                    {(result?.treatment ?? []).map(
+                      (t: string, i: number) => (
+                        <li
+                          key={i}
+                          className="flex gap-3 text-sm"
+                        >
+                          <span className="font-mono text-terracotta text-xs mt-1">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
 
-                        <span>{t}</span>
-                      </li>
-                    ))}
+                          <span>{t}</span>
+                        </li>
+                      )
+                    )}
                   </ul>
                 </Card>
 
@@ -221,19 +570,26 @@ function DetectionPage() {
                       <CheckCircle2 className="h-4 w-4 text-leaf" />
                     </div>
 
-                    <h3 className="font-display text-lg">Fisorohana</h3>
+                    <h3 className="font-display text-lg">
+                      Fisorohana
+                    </h3>
                   </div>
 
                   <ul className="space-y-3">
-                    {result.prevention.map((p, i) => (
-                      <li key={i} className="flex gap-3 text-sm">
-                        <span className="font-mono text-leaf text-xs mt-1">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
+                    {(result?.prevention ?? []).map(
+                      (p: string, i: number) => (
+                        <li
+                          key={i}
+                          className="flex gap-3 text-sm"
+                        >
+                          <span className="font-mono text-leaf text-xs mt-1">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
 
-                        <span>{p}</span>
-                      </li>
-                    ))}
+                          <span>{p}</span>
+                        </li>
+                      )
+                    )}
                   </ul>
                 </Card>
               </div>
