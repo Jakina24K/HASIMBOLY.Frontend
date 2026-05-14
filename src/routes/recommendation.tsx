@@ -25,10 +25,9 @@ function RecommendationPage() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
 
   const [form, setForm] = useState({
-    region: "analamanga",
-    season: "Mafana_sy_Maina",
-    soil: "volcanic",
-    climate: "temperate",
+    region: "",
+    climate: "",
+    soil: "",
   });
 
   const handleGenerate = async () => {
@@ -39,7 +38,9 @@ function RecommendationPage() {
       console.log("FORM SENT:", form);
 
       const res = await axios.post("http://127.0.0.1:8000/api/culture_from_caracteristics/", {
-        caracteristic: form,
+        region: form.region,
+        climate: form.climate,
+        soil: form.soil,
       });
 
       console.log("API RESPONSE:", res.data);
@@ -82,6 +83,7 @@ function RecommendationPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">Aucune sélection</SelectItem>
                   {regions.map((r) => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.name}
@@ -92,7 +94,7 @@ function RecommendationPage() {
             </div>
 
             {/* SEASON */}
-            <div>
+            {/* <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Vanim-potoana
               </Label>
@@ -109,7 +111,7 @@ function RecommendationPage() {
                   <SelectItem value="cool">Tendrombohitra mangatsiaka</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             {/* SOIL */}
             <div>
@@ -121,10 +123,11 @@ function RecommendationPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="volcanic">Tany volkaniaka lonaka</SelectItem>
-                  <SelectItem value="alluvial">Tany avy amin'ny sedimenta renirano</SelectItem>
-                  <SelectItem value="lateritic">Tany lateritika</SelectItem>
-                  <SelectItem value="sandy">Tany fasika</SelectItem>
+                  <SelectItem value="none">Aucune sélection</SelectItem>
+                  <SelectItem value="tany_volkanika">Tany volkaniaka</SelectItem>
+                  <SelectItem value="tany_lonaka">Tany lonaka</SelectItem>
+                  <SelectItem value="tany_fasika">Tany avy amin'ny sedimanta renirano</SelectItem>
+                  <SelectItem value="tany_dilatra">Tany dilatra</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -142,9 +145,13 @@ function RecommendationPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="temperate">Tendrombohitra antonony</SelectItem>
-                  <SelectItem value="tropical">Tropikaly mando</SelectItem>
-                  <SelectItem value="dry">Tropikaly maina</SelectItem>
+                  <SelectItem value="none">Aucune sélection</SelectItem>
+                  <SelectItem value="toetrandro_an_tampon_tany">Tendrombohitra antonony</SelectItem>
+                  <SelectItem value="mangatsiaka_be">Mangatsiaka</SelectItem>
+                  <SelectItem value="mafana_sy_mando">Mafana sy mando</SelectItem>
+                  <SelectItem value="karankaina">Maina</SelectItem>
+                  <SelectItem value="mafana_sy_maina">Mafana sy maina</SelectItem>
+                  <SelectItem value="mafana_sy_be_orana">Mafana sy be orana</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -177,7 +184,7 @@ function RecommendationPage() {
           ) : (
             recommendations.map((c, i) => (
               <Card
-                key={c.name || i}
+                key={c.culture || i}
                 className="p-6 border-border shadow-soft hover:shadow-elegant transition group"
               >
                 <div className="flex items-start gap-5">
@@ -197,7 +204,7 @@ function RecommendationPage() {
                       <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mt-1.5">{c.note}</p>
+                    <p className="text-sm text-muted-foreground mt-1.5">{c.culture}</p>
 
                     <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
                       <div className="flex items-center gap-2 text-sm">
