@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Sparkles, Leaf } from "lucide-react";
+import { Send, Sparkles, Leaf, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/assistant")({
@@ -12,14 +12,18 @@ export const Route = createFileRoute("/assistant")({
       { title: "Mpampianatra AI — HASIMBOLY.IA" },
       {
         name: "description",
-        content: "Mametraha fanontaniana momba ny voly, aretin-javamaniry, na fomba fambolena.",
+        content:
+          "Mametraha fanontaniana momba ny voly, aretin-javamaniry, na fomba fambolena.",
       },
     ],
   }),
   component: AssistantPage,
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 const seed: Msg[] = [
   {
@@ -33,28 +37,67 @@ const suggestions = [
   "Rahoviana no tokony hambolena vary any Alaotra?",
   "Ahoana no fitsaboana ny rotin'ny ravim-paraky amin'ny fomba voajanahary?",
   "Inona no voly mahomby miaraka amin'ny mangahazo?",
-  "Habetsahan'ny sokay ho an'ny tany latérita",
+  "Firy hectara no ilaina mba hahazoana vokatra tsara amin'ny vary, ampy ho an'ny Malagasy rehetra ?",
 ];
 
 function AssistantPage() {
   const [messages, setMessages] = useState<Msg[]>(seed);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    const userMsg: Msg = { role: "user", content: text };
+  const send = async (text: string) => {
+    if (!text.trim() || loading) return;
+
+    const userMsg: Msg = {
+      role: "user",
+      content: text,
+    };
+
     setMessages((m) => [...m, userMsg]);
     setInput("");
-    setTimeout(() => {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/assistant-chat/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: text,
+            mode: "Agonnome",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur serveur");
+      }
+
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: data.result,
+        },
+      ]);
+    } catch (error: any) {
       setMessages((m) => [
         ...m,
         {
           role: "assistant",
           content:
-            "Mba hahazoana valiny tsara indrindra amin'ny toe-javatra misy anao, hisaintsaiko ny ontology sy ny famantarana farany. *(Ampifandraiso amin'ny Lovable AI Gateway ao amin'ny `/api/chat` mba hahazoana valiny tena izy mivantana.)*",
+            error.message ||
+            "Nisy olana tamin'ny fifandraisana amin'ny serveur.",
         },
       ]);
-    }, 700);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,19 +109,50 @@ function AssistantPage() {
         <Card className="lg:col-span-3 flex flex-col border-border shadow-soft overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {messages.map((m, i) => (
-              <div key={i} className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
+              <div
+                key={i}
+                className={`flex gap-3 ${
+                  m.role === "user" ? "flex-row-reverse" : ""
+                }`}
+              >
                 <div
-                  className={`h-9 w-9 rounded-full shrink-0 flex items-center justify-center ${m.role === "user" ? "bg-terracotta text-terracotta-foreground" : "bg-gradient-leaf text-leaf-foreground"}`}
+                  className={`h-9 w-9 rounded-full shrink-0 flex items-center justify-center ${
+                    m.role === "user"
+                      ? "bg-terracotta text-terracotta-foreground"
+                      : "bg-gradient-leaf text-leaf-foreground"
+                  }`}
                 >
-                  {m.role === "user" ? "RA" : <Leaf className="h-4 w-4" />}
+                  {m.role === "user" ? (
+                    "RA"
+                  ) : (
+                    <Leaf className="h-4 w-4" />
+                  )}
                 </div>
+
                 <div
-                  className={`max-w-xl rounded-2xl px-4 py-3 text-sm leading-relaxed ${m.role === "user" ? "bg-terracotta text-terracotta-foreground" : "bg-secondary text-foreground"}`}
+                  className={`max-w-xl rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                    m.role === "user"
+                      ? "bg-terracotta text-terracotta-foreground"
+                      : "bg-secondary text-foreground"
+                  }`}
                 >
                   {m.content}
                 </div>
               </div>
             ))}
+
+            {loading && (
+              <div className="flex gap-3">
+                <div className="h-9 w-9 rounded-full shrink-0 flex items-center justify-center bg-gradient-leaf text-leaf-foreground">
+                  <Leaf className="h-4 w-4" />
+                </div>
+
+                <div className="rounded-2xl px-4 py-3 bg-secondary text-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Mamaly...
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-border p-4">
@@ -95,12 +169,18 @@ function AssistantPage() {
                 placeholder="Anontanio izay tianao momba ny taninao…"
                 className="flex-1"
               />
+
               <Button
                 type="submit"
                 size="icon"
+                disabled={loading}
                 className="bg-leaf hover:bg-leaf/90 text-leaf-foreground"
               >
-                <Send className="h-4 w-4" />
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </form>
           </div>
@@ -111,6 +191,7 @@ function AssistantPage() {
             <Sparkles className="h-4 w-4 text-leaf" />
             <h3 className="font-display text-lg">Soso-kevitra</h3>
           </div>
+
           <div className="space-y-2">
             {suggestions.map((s) => (
               <button
