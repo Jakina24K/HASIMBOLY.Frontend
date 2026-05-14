@@ -13,8 +13,6 @@ import {
 
 import { useState, useEffect, useRef } from "react";
 
-import diseasedLeaf from "@/assets/diseased-leaf.jpg";
-import { treatments } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/detection")({
   head: () => ({
@@ -221,75 +219,91 @@ function DetectionPage() {
     setPreviewUrl(null);
   };
 
-  const derivedClassName =
-    prediction?.class_name ?? "Tomato Late Blight";
+const apiResult =
+  solution?.result?.result ?? solution?.result ?? solution;
 
-  const baseTreatment =
-    treatments[derivedClassName] ??
-    treatments["Tomato Late Blight"];
+  const parseSolution = (text: string) => {
+  if (!text || typeof text !== "string") {
+    return { treatment: [], prevention: [] };
+  }
 
-  const apiResult = solution?.result;
+  const lines = text
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
-  const parsedResult = (() => {
-    // CASE 1: structured JSON
-    if (
-      apiResult &&
-      typeof apiResult === "object" &&
-      Array.isArray(apiResult?.treatment) &&
-      Array.isArray(apiResult?.prevention)
-    ) {
-      return {
-        treatment: apiResult.treatment,
-        prevention: apiResult.prevention,
-      };
+  const treatment: string[] = [];
+  const prevention: string[] = [];
+
+  const isNoise = (l: string) =>
+    /(fanamarinana|diagnosis|confidence|high-confidence|fepetra|fitaovana)/i.test(
+      l
+    );
+
+  const looksLikeTreatment = (l: string) =>
+    /(zezika|rano|mampias|esory|dory|tsabo|pesticide|fungicide|pH|npk|fitarihan|care)/i.test(
+      l
+    );
+
+  const looksLikePrevention = (l: string) =>
+    /(fisorohana|fifandimbiasana|rotation|saraho|sanitary|manadio|avoid)/i.test(
+      l
+    );
+
+  for (const line of lines) {
+    const clean = line.replace(/^[-•*]\s*/, "");
+
+    if (isNoise(clean)) continue;
+
+    // 🔥 SMART ROUTING (no headers needed)
+    if (looksLikePrevention(clean)) {
+      prevention.push(clean);
+      continue;
     }
 
-    // CASE 2: plain text response
-    if (typeof apiResult === "string") {
-      const text = apiResult;
-
-      const treatmentMatch =
-        text.match(
-          /Actions Immédiates\s*:\s*([\s\S]*?)(Prévention\s*:|Amélioration de la Précision\s*:|$)/i
-        );
-
-      const preventionMatch =
-        text.match(
-          /Prévention\s*:\s*([\s\S]*)/i
-        );
-
-      const treatmentText =
-        treatmentMatch?.[1]
-          ?.trim()
-          ?.split(".")
-          ?.map((s: string) => s.trim())
-          ?.filter(Boolean) || [];
-
-      const preventionText =
-        preventionMatch?.[1]
-          ?.trim()
-          ?.split(".")
-          ?.map((s: string) => s.trim())
-          ?.filter(Boolean) || [];
-
-      return {
-        treatment:
-          treatmentText.length > 0
-            ? treatmentText
-            : baseTreatment.treatment,
-
-        prevention:
-          preventionText.length > 0
-            ? preventionText
-            : baseTreatment.prevention,
-      };
+    if (looksLikeTreatment(clean)) {
+      treatment.push(clean);
+      continue;
     }
 
-    // fallback
-    return baseTreatment;
-  })();
+    // fallback: if no clue → put in treatment (safe default)
+    treatment.push(clean);
+  }
 
-  const result = parsedResult;
+  return { treatment, prevention };
+};
+
+const rawResult =
+  solution?.result?.result ??
+  solution?.result ??
+  solution;
+
+const toroHevitra =
+  typeof rawResult === "string"
+    ? rawResult
+    : JSON.stringify(rawResult, null, 2);
+
+const parsedResult =
+  typeof apiResult === "string"
+    ? parseSolution(apiResult)
+    : apiResult?.result
+    ? parseSolution(apiResult.result)
+    : { treatment: [], prevention: [] };
+
+  const result = {
+  treatment:
+    parsedResult.treatment.length || parsedResult.prevention.length
+      ? [...parsedResult.treatment, ...parsedResult.prevention]
+      : ["Tsy nisy fitsaboana voafaritra."],
+
+  prevention:
+    parsedResult.prevention.length
+      ? parsedResult.prevention
+      : parsedResult.treatment.length
+      ? ["Jereo ny fitsaboana etsy ambony."]
+      : ["Tsy nisy fisorohana voafaritra."],
+};
 
   const confidence =
     (prediction?.probability ?? 0) <= 1
@@ -454,11 +468,11 @@ function DetectionPage() {
               </div>
 
               <h3 className="font-display text-2xl">
-                Miandry ny santionanao
+                Miandry ny sarinao ho dinihina...
               </h3>
 
               <p className="text-muted-foreground mt-2 max-w-sm">
-                Hiseho eto ny valiny miaraka amin'ny
+                Hiseho eto ny valiny miaraka amin'ny toro-hevitra maro - 
                 fitsaboana sy fisorohana.
               </p>
 
@@ -505,7 +519,7 @@ function DetectionPage() {
 
                 <div className="mt-6 grid grid-cols-1 gap-4 pt-6 border-t border-border md:grid-cols-[120px_1fr]">
                   <img
-                    src={previewUrl ?? diseasedLeaf}
+                    src={previewUrl ?? "https://via.placeholder.com/150"}
                     alt="Analyzed leaf"
                     className="w-full h-32 md:h-28 object-cover rounded-xl border border-border"
                   />
@@ -532,66 +546,22 @@ function DetectionPage() {
               </Card>
 
               {/* Treatment & Prevention */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Treatment */}
+              <div className="grid md:grid-cols-1 gap-6">
                 <Card className="p-6 border-border shadow-soft">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="h-9 w-9 rounded-lg bg-terracotta/10 flex items-center justify-center">
-                      <AlertTriangle className="h-4 w-4 text-terracotta" />
-                    </div>
+  <div className="flex items-center gap-2 mb-4">
+    <div className="h-9 w-9 rounded-lg bg-leaf/10 flex items-center justify-center">
+      <Sparkles className="h-4 w-4 text-leaf" />
+    </div>
 
-                    <h3 className="font-display text-lg">
-                      Fitsaboana
-                    </h3>
-                  </div>
+    <h3 className="font-display text-lg">
+      Toro-hevitra
+    </h3>
+  </div>
 
-                  <ul className="space-y-3">
-                    {(result?.treatment ?? []).map(
-                      (t: string, i: number) => (
-                        <li
-                          key={i}
-                          className="flex gap-3 text-sm"
-                        >
-                          <span className="font-mono text-terracotta text-xs mt-1">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-
-                          <span>{t}</span>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </Card>
-
-                {/* Prevention */}
-                <Card className="p-6 border-border shadow-soft">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="h-9 w-9 rounded-lg bg-leaf/10 flex items-center justify-center">
-                      <CheckCircle2 className="h-4 w-4 text-leaf" />
-                    </div>
-
-                    <h3 className="font-display text-lg">
-                      Fisorohana
-                    </h3>
-                  </div>
-
-                  <ul className="space-y-3">
-                    {(result?.prevention ?? []).map(
-                      (p: string, i: number) => (
-                        <li
-                          key={i}
-                          className="flex gap-3 text-sm"
-                        >
-                          <span className="font-mono text-leaf text-xs mt-1">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-
-                          <span>{p}</span>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </Card>
+  <div className="text-sm whitespace-pre-wrap leading-relaxed">
+    {toroHevitra || "Tsy nisy toro-hevitra azo."}
+  </div>
+</Card>
               </div>
             </>
           )}
