@@ -21,6 +21,7 @@ import {
   productivityColor,
   productivityLabel,
   type RegionData,
+  type Productivity,
 } from "@/lib/madagascar-regions";
 
 import { Search, MapPin, Layers, Sprout, CloudRain, Mountain, Lightbulb } from "lucide-react";
@@ -56,11 +57,13 @@ const layerOptions: { value: LayerKey; label: string }[] = [
   { value: "crops", label: "Voly mety" },
 ];
 
+const productivityKeys: Productivity[] = ["avo", "antonony", "ambany", "sarotra"];
+
 function MapPage() {
   const [selected, setSelected] = useState<RegionData>(madagascarRegions[0]);
   const [search, setSearch] = useState("");
   const [layer, setLayer] = useState<LayerKey>("productivity");
-  const [productivityFilter, setProductivityFilter] = useState<string>("all");
+  const [productivityFilter, setProductivityFilter] = useState<Productivity | "all">("all");
 
   const filteredRegions = useMemo(() => {
     return madagascarRegions.filter((r) => {
@@ -77,10 +80,10 @@ function MapPage() {
       title="Sarintanin'i Madagasikara"
       subtitle="Jereo ny faritra sy ny tombontsoa amin'ny fambolena"
     >
-      {/* Bara fanaraha-maso */}
+      {/* Toolbar */}
       <Card className="p-4 mb-6 border-border">
         <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-          {/* Fikarohana */}
+          {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 
@@ -92,22 +95,25 @@ function MapPage() {
             />
           </div>
 
-          {/* Sivana vokatra */}
-          <Select value={productivityFilter} onValueChange={setProductivityFilter}>
+          {/* Filter */}
+          <Select
+            value={productivityFilter}
+            onValueChange={(v) => setProductivityFilter(v as Productivity | "all")}
+          >
             <SelectTrigger className="w-full lg:w-[190px]">
               <SelectValue placeholder="Sivana vokatra" />
             </SelectTrigger>
 
             <SelectContent>
               <SelectItem value="all">Rehetra</SelectItem>
-              <SelectItem value="high">Avo</SelectItem>
-              <SelectItem value="medium">Antonony</SelectItem>
-              <SelectItem value="low">Ambany</SelectItem>
-              <SelectItem value="difficult">Sarotra</SelectItem>
+              <SelectItem value="avo">Avo</SelectItem>
+              <SelectItem value="antonony">Antonony</SelectItem>
+              <SelectItem value="ambany">Ambany</SelectItem>
+              <SelectItem value="sarotra">Sarotra</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Sosona sarintany */}
+          {/* Layer */}
           <Select value={layer} onValueChange={(v) => setLayer(v as LayerKey)}>
             <SelectTrigger className="w-full lg:w-[220px]">
               <Layers className="h-4 w-4 mr-2" />
@@ -123,7 +129,7 @@ function MapPage() {
             </SelectContent>
           </Select>
 
-          {/* Averina */}
+          {/* Reset */}
           <Button
             variant="outline"
             onClick={() => {
@@ -137,13 +143,13 @@ function MapPage() {
           </Button>
         </div>
 
-        {/* Fanazavana loko */}
+        {/* Legend */}
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
           <span className="text-xs uppercase tracking-wider text-muted-foreground mr-1">
             Fanazavana
           </span>
 
-          {(["high", "medium", "low", "difficult"] as const).map((p) => (
+          {productivityKeys.map((p) => (
             <button
               key={p}
               onClick={() => setProductivityFilter(productivityFilter === p ? "all" : p)}
@@ -153,20 +159,17 @@ function MapPage() {
             >
               <span
                 className="h-2.5 w-2.5 rounded-full"
-                style={{
-                  backgroundColor: productivityColor[p],
-                }}
+                style={{ backgroundColor: productivityColor[p] }}
               />
-
               {productivityLabel[p]}
             </button>
           ))}
         </div>
       </Card>
 
-      {/* Fizarana lehibe */}
+      {/* Main layout */}
       <div className="grid lg:grid-cols-10 gap-6">
-        {/* Sarintany */}
+        {/* Map */}
         <Card className="lg:col-span-7 p-0 overflow-hidden border-border shadow-soft relative">
           <div className="h-[520px] lg:h-[640px] relative">
             <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
@@ -179,7 +182,7 @@ function MapPage() {
             </Suspense>
           </div>
 
-          {/* Lisitra faritra */}
+          {/* Region list */}
           <div className="absolute top-3 left-3 z-[400] w-56 max-h-[60%] hidden md:block">
             <Card className="p-2 bg-card/95 backdrop-blur border-border">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1">
@@ -217,7 +220,7 @@ function MapPage() {
           </div>
         </Card>
 
-        {/* Tontonana ankavanana */}
+        {/* Right panel */}
         <Card className="lg:col-span-3 p-6 border-border shadow-soft">
           <div className="flex items-center gap-2 text-terracotta mb-1">
             <MapPin className="h-4 w-4" />
@@ -244,36 +247,29 @@ function MapPage() {
               <TabsTrigger value="overview" className="text-xs">
                 Topimaso
               </TabsTrigger>
-
               <TabsTrigger value="crops" className="text-xs">
                 Voly
               </TabsTrigger>
-
               <TabsTrigger value="climate" className="text-xs">
                 Toetrandro
               </TabsTrigger>
-
               <TabsTrigger value="soil" className="text-xs">
                 Tany
               </TabsTrigger>
-
               <TabsTrigger value="advice" className="text-xs">
                 Torohevitra
               </TabsTrigger>
             </TabsList>
 
             <ScrollArea className="h-[460px] mt-4 pr-2">
-              {/* Topimaso */}
               <TabsContent value="overview" className="space-y-4 mt-0">
                 <p className="text-sm leading-relaxed">{selected.summary}</p>
 
                 <div>
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className="text-muted-foreground">Halonaky ny tany</span>
-
                     <span className="font-mono">{selected.fertility}%</span>
                   </div>
-
                   <Progress value={selected.fertility} />
                 </div>
 
@@ -285,7 +281,6 @@ function MapPage() {
                 </div>
               </TabsContent>
 
-              {/* Voly */}
               <TabsContent value="crops" className="space-y-3 mt-0">
                 {selected.crops.map((crop) => (
                   <div key={crop.name} className="space-y-1">
@@ -294,14 +289,11 @@ function MapPage() {
                         <Sprout className="h-3.5 w-3.5 text-leaf" />
                         {crop.name}
                       </span>
-
                       <span className="text-xs font-mono text-muted-foreground">
                         {crop.suitability}%
                       </span>
                     </div>
-
                     <Progress value={crop.suitability} />
-
                     <div className="text-xs text-muted-foreground">
                       Vanim-potoana: {crop.season}
                     </div>
@@ -309,31 +301,25 @@ function MapPage() {
                 ))}
               </TabsContent>
 
-              {/* Toetrandro */}
               <TabsContent value="climate" className="space-y-3 mt-0">
                 <Stat
-                  label="Karazana toetrandro"
+                  label="Toetrandro"
                   value={selected.climate}
                   icon={<CloudRain className="h-3.5 w-3.5" />}
                 />
-
-                <Stat label="Oran-taona" value={selected.rainfall} />
-
+                <Stat label="Orana" value={selected.rainfall} />
                 <Stat label="Mari-pana" value={selected.temperature} />
               </TabsContent>
 
-              {/* Tany */}
               <TabsContent value="soil" className="space-y-3 mt-0">
                 <Stat
-                  label="Karazan-tany"
+                  label="Tany"
                   value={selected.soil}
                   icon={<Mountain className="h-3.5 w-3.5" />}
                 />
-
                 <Progress value={selected.fertility} />
               </TabsContent>
 
-              {/* Torohevitra */}
               <TabsContent value="advice" className="space-y-2 mt-0">
                 {selected.advice.map((a) => (
                   <div
@@ -360,7 +346,6 @@ function Stat({ label, value, icon }: { label: string; value: string; icon?: Rea
         {icon}
         {label}
       </dt>
-
       <dd className="text-sm font-medium">{value}</dd>
     </div>
   );
