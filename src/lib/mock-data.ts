@@ -46,7 +46,7 @@ export const diseases = [
 export const recentDiagnoses = [
   {
     id: "r1",
-    crop: "Tomato",
+    crop: "Voatabia",
     disease: "Late Blight",
     date: "2026-04-28",
     confidence: 94,
@@ -54,7 +54,7 @@ export const recentDiagnoses = [
   },
   {
     id: "r2",
-    crop: "Rice",
+    crop: "Vary",
     disease: "Healthy",
     date: "2026-04-27",
     confidence: 99,
@@ -62,7 +62,7 @@ export const recentDiagnoses = [
   },
   {
     id: "r3",
-    crop: "Cassava",
+    crop: "Mangahazo",
     disease: "Mosaic Virus",
     date: "2026-04-26",
     confidence: 87,
@@ -70,7 +70,7 @@ export const recentDiagnoses = [
   },
   {
     id: "r4",
-    crop: "Maize",
+    crop: "Katsaka",
     disease: "Leaf Rust",
     date: "2026-04-25",
     confidence: 78,
@@ -78,7 +78,7 @@ export const recentDiagnoses = [
   },
   {
     id: "r5",
-    crop: "Coffee",
+    crop: "Kafe",
     disease: "Healthy",
     date: "2026-04-24",
     confidence: 96,
@@ -133,28 +133,28 @@ export const regions = [
 
 export const cropRecommendations = [
   {
-    name: "Rice (Vary)",
+    name: "Vary",
     score: 96,
     yield: "5.2 t/ha",
     season: "Nov–Apr",
     note: "Optimal for highland paddies with reliable rainfall.",
   },
   {
-    name: "Cassava",
+    name: "Mangahazo",
     score: 89,
     yield: "12 t/ha",
     season: "Year-round",
     note: "Drought-tolerant, suitable for poor soils.",
   },
   {
-    name: "Maize",
+    name: "Katsaka",
     score: 82,
     yield: "3.8 t/ha",
     season: "Oct–Mar",
     note: "Pair with legume rotation to maintain N levels.",
   },
   {
-    name: "Sweet Potato",
+    name: "Vomanga",
     score: 76,
     yield: "8 t/ha",
     season: "Aug–Jan",

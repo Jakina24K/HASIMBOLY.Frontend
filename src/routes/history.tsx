@@ -54,10 +54,10 @@ function HistoryPage() {
       {/* Statistiques */}
       <div className="grid lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Famantarana rehetra", value: "234" },
+          { label: "Famantarana rehetra", value: "7" },
           { label: "Tahan'ny salama", value: "67%" },
           { label: "Salan'isa fahatokisana", value: "91%" },
-          { label: "Faritra voatahiry", value: "8 / 22" },
+          { label: "Faritra voatahiry", value: "6 / 22" },
         ].map((s) => (
           <Card key={s.label} className="p-5 border-border shadow-soft">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</div>
@@ -72,10 +72,10 @@ function HistoryPage() {
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h3 className="font-display text-2xl">Rejisitry ny famantarana</h3>
 
-          <Button variant="outline" size="sm" className="gap-2">
+          {/* <Button variant="outline" size="sm" className="gap-2">
             <Download className="h-3.5 w-3.5" />
             Maka CSV
-          </Button>
+          </Button> */}
         </div>
 
         <div className="divide-y divide-border">
