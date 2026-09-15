@@ -3,16 +3,9 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Upload,
-  Camera,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
-} from "lucide-react";
+import { Upload, Camera, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
-
 
 export const Route = createFileRoute("/detection")({
   head: () => ({
@@ -35,27 +28,21 @@ function DetectionPage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [stage, setStage] = useState<
-    "idle" | "uploading" | "predicting" | "generating"
-  >("idle");
+  const [stage, setStage] = useState<"idle" | "uploading" | "predicting" | "generating">("idle");
 
   const [solution, setSolution] = useState<any>(null);
 
-  const [prediction, setPrediction] = useState<
-    | {
-        class_index: number;
-        class_name: string;
-        probability: number;
-      }
-    | null
-  >(null);
+  const [prediction, setPrediction] = useState<{
+    class_index: number;
+    class_name: string;
+    probability: number;
+  } | null>(null);
 
   const [error, setError] = useState<string | null>(null);
 
   const controllerRef = useRef<AbortController | null>(null);
 
-  const apiBase =
-    import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  const apiBase = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     return () => {
@@ -71,25 +58,22 @@ function DetectionPage() {
     cleanedTheme: string,
     text: string,
     mode: string,
-    signal: AbortSignal
+    signal: AbortSignal,
   ) {
     console.log("CALLING SOLUTION API");
 
-    const res = await fetch(
-      `${apiBase}/api/disease/solution/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cleaned_theme: cleanedTheme,
-          text,
-          mode,
-        }),
-        signal,
-      }
-    );
+    const res = await fetch(`${apiBase}/api/disease/solution/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cleaned_theme: cleanedTheme,
+        text,
+        mode,
+      }),
+      signal,
+    });
 
     console.log("SOLUTION STATUS:", res.status);
 
@@ -98,9 +82,7 @@ function DetectionPage() {
 
       console.error(errText);
 
-      throw new Error(
-        `Failed solution request (${res.status})`
-      );
+      throw new Error(`Failed solution request (${res.status})`);
     }
 
     return await res.json();
@@ -138,19 +120,14 @@ function DetectionPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const predictRes = await fetch(
-        `${apiBase}/api/disease/predict/`,
-        {
-          method: "POST",
-          body: formData,
-          signal: controller.signal,
-        }
-      );
+      const predictRes = await fetch(`${apiBase}/api/disease/`, {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
 
       if (!predictRes.ok) {
-        throw new Error(
-          `Prediction failed (${predictRes.status})`
-        );
+        throw new Error(`Prediction failed (${predictRes.status})`);
       }
 
       setStage("predicting");
@@ -159,23 +136,23 @@ function DetectionPage() {
 
       console.log("PREDICT RESPONSE:", predictData);
 
-      if (!predictData?.class_name) {
+      if (!predictData?.prediction?.class_name) {
         throw new Error("No class_name returned");
       }
 
       setPrediction({
-        class_index: predictData.class_index ?? 0,
-        class_name: predictData.class_name,
-        probability: predictData.probability ?? 0,
+        class_index: predictData.prediction.class_index ?? 0,
+        class_name: predictData.prediction.class_name,
+        probability: predictData.prediction.probability ?? 0,
       });
 
       setStage("generating");
 
       const solutionData = await requestDiseaseSolution(
         "Ravinkazo",
-        `Aretina: ${predictData.class_name}`,
+        `Aretina: ${predictData.prediction.class_name}`,
         "Agronome",
-        controller.signal
+        controller.signal,
       );
 
       console.log("SOLUTION RESPONSE:", solutionData);
@@ -191,11 +168,7 @@ function DetectionPage() {
         return;
       }
 
-      setError(
-        e instanceof Error
-          ? e.message
-          : "Error during prediction"
-      );
+      setError(e instanceof Error ? e.message : "Error during prediction");
     } finally {
       setLoading(false);
       setStage("idle");
@@ -219,97 +192,80 @@ function DetectionPage() {
     setPreviewUrl(null);
   };
 
-const apiResult =
-  solution?.result?.result ?? solution?.result ?? solution;
+  const apiResult = solution?.result?.result ?? solution?.result ?? solution;
 
   const parseSolution = (text: string) => {
-  if (!text || typeof text !== "string") {
-    return { treatment: [], prevention: [] };
-  }
-
-  const lines = text
-    .replace(/\r/g, "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const treatment: string[] = [];
-  const prevention: string[] = [];
-
-  const isNoise = (l: string) =>
-    /(fanamarinana|diagnosis|confidence|high-confidence|fepetra|fitaovana)/i.test(
-      l
-    );
-
-  const looksLikeTreatment = (l: string) =>
-    /(zezika|rano|mampias|esory|dory|tsabo|pesticide|fungicide|pH|npk|fitarihan|care)/i.test(
-      l
-    );
-
-  const looksLikePrevention = (l: string) =>
-    /(fisorohana|fifandimbiasana|rotation|saraho|sanitary|manadio|avoid)/i.test(
-      l
-    );
-
-  for (const line of lines) {
-    const clean = line.replace(/^[-•*]\s*/, "");
-
-    if (isNoise(clean)) continue;
-
-    // 🔥 SMART ROUTING (no headers needed)
-    if (looksLikePrevention(clean)) {
-      prevention.push(clean);
-      continue;
+    if (!text || typeof text !== "string") {
+      return { treatment: [], prevention: [] };
     }
 
-    if (looksLikeTreatment(clean)) {
+    const lines = text
+      .replace(/\r/g, "")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    const treatment: string[] = [];
+    const prevention: string[] = [];
+
+    const isNoise = (l: string) =>
+      /(fanamarinana|diagnosis|confidence|high-confidence|fepetra|fitaovana)/i.test(l);
+
+    const looksLikeTreatment = (l: string) =>
+      /(zezika|rano|mampias|esory|dory|tsabo|pesticide|fungicide|pH|npk|fitarihan|care)/i.test(l);
+
+    const looksLikePrevention = (l: string) =>
+      /(fisorohana|fifandimbiasana|rotation|saraho|sanitary|manadio|avoid)/i.test(l);
+
+    for (const line of lines) {
+      const clean = line.replace(/^[-•*]\s*/, "");
+
+      if (isNoise(clean)) continue;
+
+      // 🔥 SMART ROUTING (no headers needed)
+      if (looksLikePrevention(clean)) {
+        prevention.push(clean);
+        continue;
+      }
+
+      if (looksLikeTreatment(clean)) {
+        treatment.push(clean);
+        continue;
+      }
+
+      // fallback: if no clue → put in treatment (safe default)
       treatment.push(clean);
-      continue;
     }
 
-    // fallback: if no clue → put in treatment (safe default)
-    treatment.push(clean);
-  }
+    return { treatment, prevention };
+  };
 
-  return { treatment, prevention };
-};
+  const rawResult = solution?.result?.result ?? solution?.result ?? solution;
 
-const rawResult =
-  solution?.result?.result ??
-  solution?.result ??
-  solution;
+  const toroHevitra =
+    typeof rawResult === "string" ? rawResult : JSON.stringify(rawResult, null, 2);
 
-const toroHevitra =
-  typeof rawResult === "string"
-    ? rawResult
-    : JSON.stringify(rawResult, null, 2);
-
-const parsedResult =
-  typeof apiResult === "string"
-    ? parseSolution(apiResult)
-    : apiResult?.result
-    ? parseSolution(apiResult.result)
-    : { treatment: [], prevention: [] };
+  const parsedResult =
+    typeof apiResult === "string"
+      ? parseSolution(apiResult)
+      : apiResult?.result
+        ? parseSolution(apiResult.result)
+        : { treatment: [], prevention: [] };
 
   const result = {
-  treatment:
-    parsedResult.treatment.length || parsedResult.prevention.length
-      ? [...parsedResult.treatment, ...parsedResult.prevention]
-      : ["Tsy nisy fitsaboana voafaritra."],
+    treatment:
+      parsedResult.treatment.length || parsedResult.prevention.length
+        ? [...parsedResult.treatment, ...parsedResult.prevention]
+        : ["Tsy nisy fitsaboana voafaritra."],
 
-  prevention:
-    parsedResult.prevention.length
+    prevention: parsedResult.prevention.length
       ? parsedResult.prevention
       : parsedResult.treatment.length
-      ? ["Jereo ny fitsaboana etsy ambony."]
-      : ["Tsy nisy fisorohana voafaritra."],
-};
+        ? ["Jereo ny fitsaboana etsy ambony."]
+        : ["Tsy nisy fisorohana voafaritra."],
+  };
 
-  const confidence =
-    (prediction?.probability ?? 0) <= 1
-      ? Math.round((prediction?.probability ?? 0) * 100)
-      : Math.round(prediction?.probability ?? 0);
-
+  const confidence = prediction?.probability;
   return (
     <AppShell
       title="Famantarana Aretina"
@@ -318,9 +274,7 @@ const parsedResult =
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Upload */}
         <Card className="lg:col-span-2 p-6 border-border shadow-soft">
-          <h3 className="font-display text-xl mb-4">
-            1. Hampiditra santionany
-          </h3>
+          <h3 className="font-display text-xl mb-4">1. Hampiditra santionany</h3>
 
           <div
             className={`aspect-square rounded-2xl border-2 border-dashed border-border bg-secondary/40 flex flex-col items-center justify-center relative overflow-hidden group transition-all ${
@@ -341,9 +295,7 @@ const parsedResult =
                   URL.revokeObjectURL(previewUrl);
                 }
 
-                setPreviewUrl(
-                  next ? URL.createObjectURL(next) : null
-                );
+                setPreviewUrl(next ? URL.createObjectURL(next) : null);
 
                 setAnalyzed(false);
                 setPrediction(null);
@@ -372,19 +324,14 @@ const parsedResult =
                     </div>
 
                     <p className="text-white mt-5 font-display text-lg">
-                      {stage === "uploading" &&
-                        "Mandefa sary..."}
+                      {stage === "uploading" && "Mandefa sary..."}
 
-                      {stage === "predicting" &&
-                        "Mamantatra aretina..."}
+                      {stage === "predicting" && "Mamantatra aretina..."}
 
-                      {stage === "generating" &&
-                        "Mamokatra vahaolana..."}
+                      {stage === "generating" && "Mamokatra vahaolana..."}
                     </p>
 
-                    <p className="text-white/70 text-sm mt-2">
-                      Miandrasa kely azafady...
-                    </p>
+                    <p className="text-white/70 text-sm mt-2">Miandrasa kely azafady...</p>
                   </div>
                 )}
               </>
@@ -397,22 +344,14 @@ const parsedResult =
                   <Upload className="h-7 w-7 text-leaf" />
                 </div>
 
-                <p className="font-medium">
-                  Ampidiro ny sary eto
-                </p>
+                <p className="font-medium">Ampidiro ny sary eto</p>
 
-                <p className="text-sm text-muted-foreground mt-1">
-                  JPG, PNG hatramin'ny 10 MB
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">JPG, PNG hatramin'ny 10 MB</p>
               </label>
             )}
           </div>
 
-          {file && (
-            <p className="text-sm text-muted-foreground mt-3 truncate">
-              {file.name}
-            </p>
-          )}
+          {file && <p className="text-sm text-muted-foreground mt-3 truncate">{file.name}</p>}
 
           {error && (
             <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
@@ -424,23 +363,14 @@ const parsedResult =
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() =>
-                document
-                  .getElementById("detection-file")
-                  ?.click()
-              }
+              onClick={() => document.getElementById("detection-file")?.click()}
               disabled={loading}
             >
               <Camera className="h-4 w-4" />
               Fakan-tsary
             </Button>
 
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={resetAll}
-              disabled={loading}
-            >
+            <Button variant="outline" className="gap-2" onClick={resetAll} disabled={loading}>
               Avereno
             </Button>
           </div>
@@ -453,9 +383,7 @@ const parsedResult =
           >
             <Sparkles className="h-4 w-4" />
 
-            {loading
-              ? "Manadihady..."
-              : "Handinika amin'ny AI"}
+            {loading ? "Manadihady..." : "Handinika amin'ny AI"}
           </Button>
         </Card>
 
@@ -467,13 +395,10 @@ const parsedResult =
                 <Sparkles className="h-8 w-8 text-leaf" />
               </div>
 
-              <h3 className="font-display text-2xl">
-                Miandry ny sarinao ho dinihina...
-              </h3>
+              <h3 className="font-display text-2xl">Miandry ny sarinao ho dinihina...</h3>
 
               <p className="text-muted-foreground mt-2 max-w-sm">
-                Hiseho eto ny valiny miaraka amin'ny toro-hevitra maro - 
-                fitsaboana sy fisorohana.
+                Hiseho eto ny valiny miaraka amin'ny toro-hevitra maro - fitsaboana sy fisorohana.
               </p>
 
               {previewUrl && !loading && (
@@ -494,9 +419,7 @@ const parsedResult =
                       Hamafiny avo
                     </Badge>
 
-                    <h2 className="font-display text-3xl">
-                      {prediction?.class_name}
-                    </h2>
+                    <h2 className="font-display text-3xl">{prediction?.class_name}</h2>
 
                     <p className="text-muted-foreground mt-1 italic font-display">
                       AI disease detection
@@ -510,9 +433,6 @@ const parsedResult =
 
                     <div className="font-display text-4xl text-leaf">
                       {confidence}
-                      <span className="text-lg text-muted-foreground">
-                        %
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -529,9 +449,7 @@ const parsedResult =
                       Ny AI dia nahita aretina mety ho:
                     </p>
 
-                    <p className="font-display text-xl mt-1">
-                      {prediction?.class_name}
-                    </p>
+                    <p className="font-display text-xl mt-1">{prediction?.class_name}</p>
 
                     <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
                       <div
@@ -548,20 +466,18 @@ const parsedResult =
               {/* Treatment & Prevention */}
               <div className="grid md:grid-cols-1 gap-6">
                 <Card className="p-6 border-border shadow-soft">
-  <div className="flex items-center gap-2 mb-4">
-    <div className="h-9 w-9 rounded-lg bg-leaf/10 flex items-center justify-center">
-      <Sparkles className="h-4 w-4 text-leaf" />
-    </div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-9 w-9 rounded-lg bg-leaf/10 flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-leaf" />
+                    </div>
 
-    <h3 className="font-display text-lg">
-      Toro-hevitra
-    </h3>
-  </div>
+                    <h3 className="font-display text-lg">Toro-hevitra</h3>
+                  </div>
 
-  <div className="text-sm whitespace-pre-wrap leading-relaxed">
-    {toroHevitra || "Tsy nisy toro-hevitra azo."}
-  </div>
-</Card>
+                  <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {toroHevitra || "Tsy nisy toro-hevitra azo."}
+                  </div>
+                </Card>
               </div>
             </>
           )}

@@ -95,7 +95,7 @@ export const regions = [
     crops: ["Rice", "Potato", "Maize"],
   },
   {
-    id: "alaotra",
+    id: "alaotra_mangoro",
     name: "Alaotra-Mangoro",
     climate: "Subtropical humid",
     soil: "Alluvial",
