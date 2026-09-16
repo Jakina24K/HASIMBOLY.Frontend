@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { regions } from "@/lib/mock-data";
-import { Sparkles, Sprout, TrendingUp, Calendar } from "lucide-react";
+import { Sparkles, Sprout, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/recommendation")({
   component: RecommendationPage,
@@ -23,6 +23,7 @@ function RecommendationPage() {
   const [generated, setGenerated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
     region: "",
@@ -30,10 +31,15 @@ function RecommendationPage() {
     soil: "",
   });
 
+  const hasCriteria = [form.region, form.climate, form.soil].some(
+    (value) => value !== "" && value !== "none",
+  );
+
   const handleGenerate = async () => {
     try {
       setLoading(true);
       setGenerated(false);
+      setMessage("");
 
       console.log("FORM SENT:", form);
 
@@ -48,9 +54,13 @@ function RecommendationPage() {
       const data = res.data?.cultures || [];
 
       setRecommendations(data);
+      setMessage(res.data?.message || "");
       setGenerated(true);
     } catch (err) {
       console.log("API ERROR:", err);
+      setMessage("Au moins un critère doit être renseigné : région, climat ou type de sol.");
+      setGenerated(true);
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
@@ -161,7 +171,7 @@ function RecommendationPage() {
               className="w-full bg-leaf hover:bg-leaf/90 text-leaf-foreground gap-2 mt-2"
               size="lg"
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || !hasCriteria}
             >
               <Sparkles className="h-4 w-4" />
               {loading ? "Miasa..." : "Mamorona tolo-kevitra"}
@@ -182,47 +192,47 @@ function RecommendationPage() {
               </p>
             </Card>
           ) : (
-            recommendations.map((c, i) => (
-              <Card
-                key={c.culture || i}
-                className="p-6 border-border shadow-soft hover:shadow-elegant transition group"
-              >
-                <div className="flex items-start gap-5">
-                  <div className="relative shrink-0">
-                    <div className="absolute inset-0 bg-gradient-leaf rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition" />
-                    <div className="relative h-20 w-20 rounded-2xl bg-gradient-leaf flex flex-col items-center justify-center text-leaf-foreground">
-                      <span className="font-display text-2xl">{c.score}</span>
-                      <span className="text-[9px] uppercase tracking-wider opacity-80">
-                        mifanaraka
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-3 flex-wrap">
-                      <h3 className="font-display text-2xl">{c.name}</h3>
-                      <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
+            recommendations.length > 0 ? (
+              recommendations.map((c, i) => (
+                <Card
+                  key={c.culture || i}
+                  className="p-6 border-border shadow-soft hover:shadow-elegant transition group"
+                >
+                  <div className="flex items-start gap-5">
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 bg-gradient-leaf rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition" />
+                      <div className="relative h-20 w-20 rounded-2xl bg-gradient-leaf flex flex-col items-center justify-center text-leaf-foreground">
+                        <span className="font-display text-2xl">{c.score}%</span>
+                        <span className="text-[9px] uppercase tracking-wider opacity-80">
+                          mifanaraka
+                        </span>
+                      </div>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mt-1.5">{c.culture}</p>
-
-                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
-                      <div className="flex items-center gap-2 text-sm">
-                        <TrendingUp className="h-4 w-4 text-leaf" />
-                        <span className="text-muted-foreground">Vokatra</span>
-                        <span className="font-mono">{c.yield}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <h3 className="font-display text-2xl">{c.culture}</h3>
+                        <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-terracotta" />
-                        <span className="text-muted-foreground">Vanim-potoana</span>
-                        <span className="font-mono">{c.season}</span>
+                      <p className="text-sm text-muted-foreground mt-1.5">{c.match_message}</p>
+
+                      <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-terracotta" />
+                          <span className="text-muted-foreground">Vanim-potoana</span>
+                          <span className="font-mono">{c.season}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Card>
+              ))
+            ) : (
+              <Card className="p-12 border-dashed flex items-center justify-center min-h-[220px] text-center">
+                <p className="text-muted-foreground">{message}</p>
               </Card>
-            ))
+            )
           )}
         </div>
       </div>
